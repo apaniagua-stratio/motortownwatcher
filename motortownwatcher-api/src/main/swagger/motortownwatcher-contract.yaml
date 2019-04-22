@@ -1,0 +1,81 @@
+swagger: '2.0'
+info:
+  description: >-
+    This API will manage the Application process of a microservice
+  version: v1
+  title: Microservice
+  contact: {}
+host: 'localhost:8080'
+basePath: /
+tags:
+  - name: microservice-controller
+    description: The microservice API
+paths:
+  '/microservices':
+    post:
+      tags:
+        - POST endpoint of the microservice
+      summary: Microservice
+      operationId: doSomething
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Example of body input for the microservice
+          required: true
+          schema:
+            $ref: '#/definitions/MicroserviceRequest'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/MicroserviceResponse'
+        '400':
+          description: Application error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '405':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+        '500':
+          description: >-
+            Business or technical error - See errors header for detailed
+            information
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+definitions:
+  MicroserviceRequest:
+    type: object
+    properties:
+      exampleInputField:
+        type: string
+  MicroserviceResponse:
+    type: object
+    properties:
+      exampleOutputField:
+  ErrorResponse:
+    type: object
+    properties:
+      data:
+        type: string
+      error:
+        type: string

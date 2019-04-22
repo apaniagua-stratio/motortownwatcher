@@ -1,0 +1,66 @@
+def nexusUrl = project.property("nexus.url")
+
+description = """"""
+
+ext {
+    currentCommitHash = getCheckedOutGitCommitHash()
+    gitUrl = getCheckedOutGitUrl()
+}
+
+buildscript {
+    apply from: "gitflow.gradle", to: buildscript
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'io.github.robwin.jgitflow'
+
+subprojects {
+
+    apply plugin: 'java'
+    apply plugin: 'maven'
+
+    repositories {
+        maven { url "$nexusUrl/repository/releases" }
+        maven { url "$nexusUrl/repository/central" }
+        jcenter()
+    }
+
+    sourceCompatibility = 8
+    targetCompatibility = 8
+
+
+    jar {
+        manifest {
+            attributes(
+                    'Implementation-Title': project.name,
+                    'Implementation-Version': project.version,
+                    'Built-By'       : System.properties['user.name'],
+                    'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+                    'Build-Revision' : currentCommitHash,
+                    'Git-Url'        : gitUrl,
+                    'Created-By'     : "Gradle ${gradle.gradleVersion}",
+                    'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+                    'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
+            )
+        }
+    }
+}
+
+
+// "import/include" from external script, useful for modularization
+apply from: "gradle/dependencyManagement.gradle"
+
+def getCheckedOutGitCommitHash() {
+    'git rev-parse --verify HEAD'.execute().text.trim()
+}
+
+def getCheckedOutGitUrl() {
+    'git config --get remote.origin.url'.execute().text.trim()
+}
+
+configurations {
+    all {
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+}

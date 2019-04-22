@@ -1,0 +1,27 @@
+ext {
+    // define version numbers here
+    junitVersion = "4.12"
+    springwebVersion = '4.3.11.RELEASE'
+    springFoxVversion = '2.7.0'
+    javaxValidation = '1.1.0.Final'
+    jacksonVersion = '2.0.1'
+    springCloudVersion = '1.4.0.RELEASE'
+}
+
+ext.libraries = [
+        // define dependent artifacts here, use version numbers defined above
+
+        api    : [
+                [group: 'org.springframework', name: 'spring-web', version: springwebVersion],
+                [group: 'io.springfox', name: 'springfox-swagger2', version: springFoxVversion],
+                [group: 'io.springfox', name: 'springfox-swagger-ui', version: springFoxVversion],
+                [group: 'javax.validation', name: 'validation-api', version: javaxValidation],
+                [group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion],
+                [group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'],
+                [group: 'org.springframework.cloud' , name: 'spring-cloud-starter-config', version: springCloudVersion]
+        ],
+        testing: [
+                [group: 'junit', name: 'junit', version: junitVersion]
+        ]
+
+]

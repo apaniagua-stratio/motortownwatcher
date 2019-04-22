@@ -1,0 +1,148 @@
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+import com.bmuschko.gradle.docker.tasks.image.DockerRemoveImage
+import org.apache.tools.ant.filters.ReplaceTokens
+
+buildscript {
+  apply from: "docker.gradle", to: buildscript
+}
+
+plugins {
+  id 'org.springframework.boot' version '2.0.7.RELEASE'
+  id "io.spring.dependency-management" version "1.0.6.RELEASE"
+  id "net.ltgt.apt" version "0.10"
+}
+
+apply plugin: 'com.bmuschko.docker-remote-api'
+apply plugin: 'org.springframework.boot'
+
+
+def artifactId = project.property("artifactId")
+def group = project.property("group")
+def version = project.property("version")
+def domain = project.property("domain")
+
+def dockerRegistryUrl = project.property("docker.registry.url")
+
+def suffixTimestamp = project.property("suffixTimestamp")
+
+ext{
+  microservicesParent = '1.1.0'
+  lombokVersion = '1.18.4'
+  mapstructVersion = '1.2.0.Final'
+  commonsIoVersion = '2.6'
+  jacksonDataTypeVersion = '2.9.1'
+  swaggerVersion = '2.9.2'
+  sleuthVersion = '2.0.2.RELEASE'
+  podamVersion = '7.2.0.RELEASE'
+}
+
+
+dependencies {
+  compile "com.stratio.architecture:stratio-microservices-parent:${microservicesParent}"
+
+  compile "org.springframework.cloud:spring-cloud-starter-config"
+  compile "org.springframework.boot:spring-boot-starter-web"
+  compile "org.springframework.boot:spring-boot-starter-actuator"
+
+  compile project(":motortownwatcher-api")
+
+  compile "org.mapstruct:mapstruct-jdk8:${mapstructVersion}"
+  apt "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+  compileOnly "org.projectlombok:lombok:${lombokVersion}"
+  apt "org.projectlombok:lombok:${lombokVersion}"
+
+  compile "commons-io:commons-io:${commonsIoVersion}"
+  compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonDataTypeVersion}"
+  compile "org.springframework.cloud:spring-cloud-starter-sleuth:${sleuthVersion}"
+
+  compile "io.springfox:springfox-swagger2:${swaggerVersion}"
+  compile "io.springfox:springfox-swagger-ui:${swaggerVersion}"
+  compile "io.springfox:springfox-bean-validators:${swaggerVersion}"
+
+  compile group: 'com.jcraft', name: 'jsch', version: '0.1.55'
+  compile "org.postgresql:postgresql:42.2.2"
+  compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+  // https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
+  compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0'
+// https://mvnrepository.com/artifact/org.javassist/javassist
+  compile group: 'org.javassist', name: 'javassist', version: '3.23.1-GA'
+
+
+  testCompile "org.springframework.boot:spring-boot-starter-test"
+  testCompile "junit:junit"
+  testCompile "uk.co.jemos.podam:podam:${podamVersion}"
+}
+
+
+bootJar {
+  baseName = artifactId
+  version =  version
+  exclude '**.pom*'
+}
+
+sourceSets {
+  main {
+    resources {
+      srcDirs "src/main/resources", "src/main/ci"
+    }
+  }
+}
+
+task copyJar(type: Copy) {
+  from 'build/libs'
+  into "${getSourceSets().getByName('main').getOutput().resourcesDir}/lib"
+}
+
+
+processResources {
+  filter ReplaceTokens, tokens: [
+          "project.version"    : version,
+          "project.group"      : group,
+          "project.artifactId" : artifactId,
+          "project.domain"     : domain,
+          "project.suffixBuildNumber": suffixBuildNumber,
+          "suffix.timestamp"   : suffixTimestamp,
+          "docker.registry.url": dockerRegistryUrl,
+          "built-by"           : System.properties['user.name'],
+          "build-timestamp"    : new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+          "git.commit"         : currentCommitHash,
+          "git.uri"            : gitUrl
+
+  ]
+}
+
+
+task unitTest(type: Test) {
+  doLast {
+    file("$sourceSets.main.output.classesDir/META-INF").deleteDir()
+  }
+}
+
+
+task buildDockerImage(type: DockerBuildImage) {
+  dependsOn copyJar
+  inputDir = file(getSourceSets().getByName('main').getOutput().resourcesDir)
+  tag = "$dockerRegistryUrl/$artifactId:$version$suffixBuildNumber$suffixTimestamp"
+  buildArgs([GIT_COMMIT: currentCommitHash, GIT_URL: gitUrl])
+}
+
+task pushDockerImage(type: DockerPushImage) {
+  tag = "$version$suffixBuildNumber$suffixTimestamp"
+  imageName = "$dockerRegistryUrl/$artifactId"
+}
+
+task removeDockerImage(type: DockerRemoveImage) {
+  imageId = "$dockerRegistryUrl/$artifactId:$version$suffixBuildNumber$suffixTimestamp"
+}
+
+configurations {
+  all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+  }
+  runtime {
+    // i.e. add runtime exclusions here
+  }
+}

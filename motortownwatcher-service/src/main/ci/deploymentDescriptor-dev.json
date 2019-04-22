@@ -1,0 +1,34 @@
+{
+  "general":{
+    "serviceId":"/@project.domain@/@project.artifactId@@suffix.timestamp@",
+    "dockerImage":"@project.artifactId@:@project.version@@project.suffixBuildNumber@@suffix.timestamp@",
+    "CPUs":0.5,
+    "MEM":1024,
+    "INSTANCES":1,
+    "DISK":0,
+    "GPUs":0,
+    "networkName":"stratio"
+  },
+  "environment":{
+    "vaultHost":"vault.service.eos.indra.int",
+    "configServerUri":"https://config-server.config.marathon.mesos:8443",
+    "springCloudConfigEnabled":false,
+    "asTriggerMode":"all",
+    "asMinInstances":1,
+    "asCoolDownFactor":3,
+    "asMicroservice":true,
+    "asMinMemPercent":60,
+    "asMaxInstances":1,
+    "asMaxCpuTime":80,
+    "asMetricsPortName":"metrics",
+    "asMaxMemPercent":85,
+    "asMinCpuTime":60,
+    "asAutoscaleMultiplier":1.5,
+    "asTriggerNumber":2,
+    "configServerName":"config-server",
+    "vaultPort":8200,
+    "springProfilesActive":"dev,info,default",
+    "deploymentEnv":"dev",
+    "approle":"{secret=role}"
+  }
+}

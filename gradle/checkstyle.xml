@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	This configuration file was written by the eclipse-cs plugin configuration editor
+-->
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.2//EN" "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+<module name="Checker">
+    <property name="severity" value="warning"/>
+
+    	<module name="FileLength">
+            <property name="max" value="20000"/>
+        </module>
+
+    <module name="TreeWalker">
+        <module name="FileContentsHolder"/>
+        <module name="ModifierOrder"/>
+        <module name="RedundantModifier">
+            <property name="tokens" value="METHOD_DEF, VARIABLE_DEF"/>
+        </module>
+        <module name="EmptyBlock">
+            <property name="option" value="text"/>
+            <property name="tokens" value="LITERAL_CATCH, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_IF, LITERAL_FOR, LITERAL_TRY, LITERAL_WHILE, STATIC_INIT"/>
+        </module>
+        <module name="LeftCurly">
+            <property name="tokens" value="CLASS_DEF, CTOR_DEF, INTERFACE_DEF, LITERAL_CATCH, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, METHOD_DEF"/>
+        </module>
+        <module name="NeedBraces"/>
+        <module name="RightCurly">
+            <property name="tokens" value="LITERAL_CATCH, LITERAL_ELSE, LITERAL_TRY"/>
+        </module>
+        <module name="CovariantEquals"/>
+        <module name="DeclarationOrder">
+            <property name="severity" value="ignore"/>
+        </module>
+        <module name="DefaultComesLast"/>
+        <module name="EmptyStatement"/>
+        <module name="EqualsHashCode"/>
+        <module name="FinalLocalVariable">
+            <property name="severity" value="ignore"/>
+            <property name="tokens" value="VARIABLE_DEF,PARAMETER_DEF"/>
+        </module>
+        <module name="HiddenField">
+            <property name="tokens" value="PARAMETER_DEF, VARIABLE_DEF"/>
+        </module>
+        <module name="IllegalInstantiation">
+            <property name="classes" value="java.lang.Boolean"/>
+        </module>
+        <module name="JUnitTestCase"/>
+        <module name="MultipleVariableDeclarations"/>
+        <module name="NestedIfDepth">
+            <property name="max" value="15"/>
+        </module>
+        <module name="NestedTryDepth">
+            <property name="max" value="5"/>
+        </module>
+        <module name="PackageDeclaration">
+		  <property name="ignoreDirectoryName" value="true"/>
+		</module>
+        <module name="SimplifyBooleanReturn"/>
+        <module name="StringLiteralEquality"/>
+        <module name="SuperClone"/>
+        <module name="SuperFinalize"/>
+        <module name="FinalClass"/>
+        <module name="HideUtilityClassConstructor"/>
+        <module name="VisibilityModifier">
+            <property name="packageAllowed" value="true"/>
+            <property name="protectedAllowed" value="true"/>
+        </module>
+        <module name="IllegalImport"/>
+        <module name="ImportOrder">
+            <property name="ordered" value="false"/>
+        </module>
+        <module name="RedundantImport"/>
+        <module name="UnusedImports">
+          <property name="severity" value="ignore"/>
+        </module>
+		<!-- optional checks removed since Checkstyle 5.0
+        <module name="j2ee.FinalStatic">
+            <property name="severity" value="ignore"/>
+        </module>
+		
+        <module name="j2ee.LocalHomeInterface"/>
+        <module name="j2ee.LocalInterface"/>
+        <module name="j2ee.MessageBean"/>
+        <module name="j2ee.RemoteHomeInterface"/>
+        <module name="j2ee.RemoteInterface"/>
+        <module name="j2ee.SessionBean"/>
+        <module name="j2ee.ThisParameter"/>
+        <module name="j2ee.ThisReturn"/>
+		-->
+        <module name="JavadocMethod">
+            <property name="scope" value="public"/>
+            <property name="allowUndeclaredRTE" value="true"/>
+            <property name="logLoadErrors" value="true"/>
+            <property name="suppressLoadErrors" value="true"/>
+        </module>
+        <module name="JavadocStyle">
+            <property name="checkFirstSentence" value="false"/>
+        </module>
+        <module name="JavadocType">
+            <property name="scope" value="public"/>
+            <property name="tokens" value="CLASS_DEF, INTERFACE_DEF"/>
+        </module>
+        <module name="JavadocVariable">
+            <property name="scope" value="public"/>
+        </module>
+        <module name="AbstractClassName">
+            <property name="severity" value="ignore"/>
+        </module>
+        <module name="ConstantName">
+            <property name="format" value="^[A-Z](_?[A-Z0-9]+)*$|^[a-z][a-zA-Z0-9]*$|^m_log$"/>
+        </module>
+        <module name="LocalFinalVariableName"/>
+        <module name="LocalVariableName"/>
+        <module name="MemberName">
+            <property name="format" value="^m_[a-z][a-zA-Z0-9]*$"/>
+        </module>
+        <module name="MethodName"/>
+        <module name="PackageName">
+            <property name="format" value="^[a-z]+(\.[a-z0-9]*)*$"/>
+        </module>
+        <module name="ParameterName"/>
+        <module name="StaticVariableName"/>
+        <module name="TypeName">
+            <property name="tokens" value="CLASS_DEF, INTERFACE_DEF"/>
+        </module>
+        <module name="AnonInnerLength">
+            <property name="max" value="200"/>
+        </module>
+        <module name="LineLength">
+		    <property name="max" value="120"/>
+            <property name="ignorePattern" value="^[ ]*//.*$|^[ ]*[*][ ]*[$]Header.*$|^[ ]*[*][ ]*.*@see.*$|^.*#CSIGNORE$|^[ ]*[*][ ]*.*@link.*$|^import.*|^package.*$"/>
+            <property name="tabWidth" value="2"/>
+        </module>
+        <module name="MethodLength">
+            <property name="max" value="1000"/>
+            <property name="tokens" value="CTOR_DEF"/>
+        </module>
+        <module name="MethodLength">
+            <property name="max" value="500"/>
+            <property name="countEmpty" value="false"/>
+            <property name="tokens" value="METHOD_DEF"/>
+        </module>
+        <module name="ArrayTypeStyle">
+            <property name="severity" value="ignore"/>
+        </module>
+        <module name="NoWhitespaceAfter">
+            <property name="severity" value="ignore"/>
+            <property name="tokens" value="BNOT,DEC,DOT,INC,LNOT,UNARY_MINUS,UNARY_PLUS"/>
+        </module>
+        <module name="NoWhitespaceBefore">
+            <property name="severity" value="ignore"/>
+        </module>
+        <module name="OperatorWrap">
+            <property name="severity" value="ignore"/>
+        </module>
+        <module name="EmptyForInitializerPad">
+            <property name="severity" value="ignore"/>
+        </module>
+        <module name="EmptyForIteratorPad">
+            <property name="severity" value="ignore"/>
+        </module>
+        <module name="MethodParamPad">
+            <property name="severity" value="ignore"/>
+            <property name="allowLineBreaks" value="true"/>
+        </module>
+        <module name="ParenPad">
+            <property name="severity" value="ignore"/>
+        </module>
+        <module name="WhitespaceAfter">
+            <property name="severity" value="ignore"/>
+            <property name="tokens" value="COMMA,SEMI"/>
+        </module>
+        <module name="WhitespaceAround">
+            <property name="severity" value="ignore"/>
+        </module>
+        <module name="UpperEll"/>
+        <module name="TypecastParenPad">
+            <property name="severity" value="ignore"/>
+            <property name="tokens" value="RPAREN,TYPECAST"/>
+        </module>
+        <module name="EmptyForInitializerPad">
+            <property name="severity" value="ignore"/>
+        </module>
+        <module name="EmptyForIteratorPad">
+            <property name="severity" value="ignore"/>
+        </module>
+    </module>
+    <module name="SuppressionCommentFilter">
+        <metadata name="com.atlassw.tools.eclipse.checkstyle.comment" value="No check"/>
+    </module>
+</module>

@@ -1,0 +1,13 @@
+dependencies {
+  compile libraries.api
+}
+
+/* Swagger tasks */
+apply from: "$rootDir/gradle/swagger/swagger.gradle"
+
+sourceSets {
+  main { 
+    java.srcDirs += "$projectDir/src/main/java-generated"
+    java.srcDirs += "$projectDir/src/main/swagger"
+  }
+}
