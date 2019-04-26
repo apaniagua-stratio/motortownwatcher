@@ -1,0 +1,169 @@
+#!groovy���
+
+properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
+
+def now = System.currentTimeMillis()
+
+def finishedFailed = false
+
+def suffixTimestamp = ""
+
+def branchType = getBranchType "${env.BRANCH_NAME}"
+def branchDeploymentEnvironment = getBranchDeploymentEnvironment branchType
+
+//Running all process inside an agent, no changing slave process: egoist strategy to prevent slave changes without stash
+node('jenkins-slave-jdk11') {
+
+    if(branchType == "dev"){
+
+        stage('build & publish') {
+            deleteDir()
+            checkout scm
+            suffixTimestamp = "-$now"
+            gradle "clean assemble publish -PsuffixTimestamp=${suffixTimestamp} -PsuffixBuildNumber=-${BUILD_NUMBER}", false
+        }
+
+
+        stage('build docker image') {
+
+            def goals = "buildDockerImage pushDockerImage -PsuffixTimestamp=${suffixTimestamp} -PsuffixBuildNumber=-${BUILD_NUMBER}"
+
+            gradle goals
+        }
+
+        stage("deploy temp artifact") {
+
+            try {
+                echo "Deploying temporal app with tmstmp to: $branchDeploymentEnvironment"
+                deployArtifactGradle(branchDeploymentEnvironment, DeployAction.DEPLOY_TIMESTAMP, "-${now}")
+            } catch (error) {
+                echo "Error in temporal deployment, destroying it..."
+                deployArtifactGradle(branchDeploymentEnvironment, DeployAction.DESTROY_FAILED, "-${now}")
+                finishedFailed = true
+            }
+        }
+
+        if (finishedFailed) {
+            currentBuild.result = 'FAILED'
+            return
+        }
+
+        stage('build docker & deploy') {
+
+            try {
+                gradle "clean assemble publish buildDockerImage pushDockerImage -PsuffixBuildNumber=-${BUILD_NUMBER}"
+                echo "Deploying app with to: $branchDeploymentEnvironment"
+                deployArtifactGradle(branchDeploymentEnvironment, DeployAction.RENAME_AND_RESTART, "-${now}")
+            } catch (error) {
+                deployArtifactGradle(branchDeploymentEnvironment, DeployAction.DESTROY_FAILED, "-${now}")
+                finishedFailed = true
+            }
+        }
+
+        if (finishedFailed) {
+            currentBuild.result = 'FAILED'
+            return
+        }else{
+            currentBuild.result = 'SUCCESS'
+            return
+        }
+    }
+}
+
+def getBranchType(String branchName) {
+
+    def devPattern = ".*develop"
+    def releasePattern = ".*release/.*"
+    def featurePattern = ".*feature/.*"
+    def hotfixPattern = ".*hotfix/.*"
+    def masterPattern = ".*master"
+
+    if (branchName =~ devPattern) {
+        return "dev"
+    } else if (branchName =~ releasePattern) {
+        return "release"
+    } else if (branchName =~ masterPattern) {
+        return "master"
+    } else if (branchName =~ featurePattern) {
+        return "feature"
+    } else if (branchName =~ hotfixPattern) {
+        return "hotfix"
+    } else {
+        return null
+    }
+}
+
+def getBranchDeploymentEnvironment(String branchType) {
+
+    if (branchType == "dev") {
+        return "dev"
+    } else if (branchType == "release") {
+        return "uat"
+    } else if (branchType == "master") {
+        return "pro"
+    } else {
+        return null
+    }
+}
+
+
+def gradle(String tasks, inServiceDir = true) {
+
+    def jobName = "${env.JOB_NAME}"
+
+    def serviceName = jobName.split('/').length > 2 ? jobName.split('/')[-2] : jobName.split('/')[0]
+
+    withCredentials([usernamePassword(credentialsId: 'gitlab-credentials', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASSWORD'),
+                     usernamePassword(credentialsId: 'nexus', usernameVariable: 'nexusUser', passwordVariable: 'nexusPassword')]) {
+
+        if (inServiceDir) {
+            dir("$serviceName-service") {
+                sh "gradle ${tasks} -Pnexus.url=${NEXUS_URL} -PnexusUser=${nexusUser} -PnexusPassword=${nexusPassword} -PgitUsername=${GIT_USER} -PgitPassword=${GIT_PASSWORD} -Dsonar.host.url=${SONAR_URL} -Dorg.gradle.daemon=false"
+            }
+        } else {
+            sh "gradle ${tasks} -Pnexus.url=${NEXUS_URL} -PnexusUser=${nexusUser} -PnexusPassword=${nexusPassword} -PgitUsername=${GIT_USER} -PgitPassword=${GIT_PASSWORD} -Dsonar.host.url=${SONAR_URL} -Dorg.gradle.daemon=false"
+        }
+    }
+}
+
+def versionGradle() {
+    def props = readProperties file: 'gradle.properties'
+    return props['version']
+}
+
+def artifactIdGradle() {
+    def props = readProperties file: 'gradle.properties'
+    return props['artifactId']
+}
+
+def domainGradle() {
+    def props = readProperties file: 'gradle.properties'
+    return props['domain']
+}
+
+def deployArtifactGradle(String branchDeploymentEnvironment, DeployAction deployAction, String timestampSuffix, Boolean cct = true, String deploymentTimeout = "300") {
+ 
+    withCredentials([usernamePassword(credentialsId: 'jenkinsDcos_' + branchDeploymentEnvironment, usernameVariable: 'USER_ID', passwordVariable: 'USER_PASSWORD')]) {
+ 
+        def artifactId = artifactIdGradle()
+        def domain = domainGradle()
+        def jobName = "${env.JOB_NAME}"
+        def serviceName = jobName.split('/').length > 2 ? jobName.split('/')[-2] : jobName.split('/')[0]
+ 
+        withEnv(["ARTIFACT_ID=${domain}/${artifactId}", "TIMESTAMP_SUFFIX=${timestampSuffix}", "DEPLOY_ACTION=${deployAction.name()}", "PROC_TIMEOUT=${deploymentTimeout}"]) {
+ 
+            dir("$serviceName-service") {
+                sh "echo Deploying to ${branchDeploymentEnvironment} using cct: ${cct}"
+                if(!cct){
+                    sh "/opt/dcos_deploy.sh ${branchDeploymentEnvironment}"
+                }else{
+                    sh "/opt/dcos_deploy.sh ${branchDeploymentEnvironment} CCT microservice cicdcd-welcomepack"
+                }
+            }
+        }
+    }
+}
+
+public enum DeployAction {
+    DEPLOY_TIMESTAMP, DEPLOY, DESTROY_FAILED, RENAME_AND_RESTART
+}

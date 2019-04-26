@@ -1,0 +1,19 @@
+service:
+  name: stratio-motortownwatcher
+
+spring:
+  application:
+    name: ${service.name}
+  cloud:
+    config:
+      uri: ${CONFIG_SERVER_URI:http://config-server:8080}
+      username: ${VAULT_BASIC_USERNAME:}
+      password: ${VAULT_BASIC_PASSWORD:}
+      label: ${DEPLOYMENT_ENV:}
+      fail-fast: true
+
+health:
+  config:
+    enabled: false
+
+

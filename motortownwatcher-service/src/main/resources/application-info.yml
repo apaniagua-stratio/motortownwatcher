@@ -1,0 +1,7 @@
+info:
+  scm: "@git.uri@"
+  commit: "@git.commit@"
+  image: "@docker.registry.url@/@project.domain@/@project.artifactId@:@project.version@@suffix.timestamp@"
+  version: "@project.version@"
+  built-by : "@built-by@"
+  build-timestamp: "@build-timestamp@"

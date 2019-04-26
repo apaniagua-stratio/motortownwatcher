@@ -1,0 +1,105 @@
+// Tasks to generate REST API source clssses and HTML docs.
+// 
+// Tasks are depenedent on swaggerApiFilename and swaggerApiBasePackage 
+// properties defined in swagger.settings.gradle.
+//  - swaggerApiFilename: points to Swagger yaml contract file.
+//  - swaggerApiBasePackage: defines base Java package for generated source classes.   
+//
+apply from: "$rootDir/gradle/swagger/swagger.settings.gradle"
+
+configurations {
+  antLibs // classpath for optional Ant tasks
+}
+
+String getAntVersion() {
+  ant.antversion(property: "_antversion")
+  return ant.properties["_antversion"]
+}
+
+dependencies {
+  antLibs("commons-net:commons-net:1.4.0")
+  antLibs("org.apache.ant:ant-commons-net:$antVersion") { transitive = false }
+}
+
+// Folder where API source classess wil be generated
+def apiSrcFolder = 'src/main/java-generated'
+
+// Folder where API source classess wil be generated
+def apiDocsFolder = "$buildDir/generated/html"
+
+task cleanGeneratedApiSrc {
+  doFirst {
+    delete "$projectDir/$apiSrcFolder/com"
+  }
+}
+
+task generateApiSrc(group: 'codegen', type: JavaExec, dependsOn: cleanGeneratedApiSrc,
+  description: 'Generate API source classes from Swagger specification') {
+
+  main="-jar";
+  args = [
+    "$rootDir/gradle/swagger/swagger-codegen-cli-flash.jar",
+    "generate",
+    "-D",
+    "dateLibrary=java8-localdatetime",
+    "-t",
+    "$rootDir/gradle/swagger/JavaSpring",
+    "-i",
+    "$swaggerApiFilename",
+    // Output to src/generated/java
+    "-D",
+    "sourceFolder=$apiSrcFolder",
+    // Use Java SpringBoot template generator
+    "-l",
+    "spring",
+    "--api-package",
+    swaggerApiBasePackage.concat(".api"),
+    "--model-package",
+    swaggerApiBasePackage.concat(".model"),
+    "-DinterfaceOnly=true",
+    "-DgenerateSupportingFiles=false",
+    "-DuseTags=true",
+    "-DserializableModel=true",
+    "-DhideGenerationTimestamp=true"
+  ]
+}
+
+compileJava.dependsOn.add("generateApiSrc")
+
+task generateApiDocs(group: 'codegen', type: JavaExec,
+  description: 'Generate API HTML docs from Swagger specification') {
+
+  main="-jar";
+  args = [
+    "$rootDir/gradle/swagger/swagger-codegen-cli-flash.jar",
+    "generate",
+    "-i",
+    "$swaggerApiFilename",
+    // Output to src/generated/java
+    "-o",
+    "$apiDocsFolder",
+    // Use Java SpringBoot template generator
+    "-l",
+    "html",
+//    "html2",
+//    "dynamic-html",
+  ]
+}
+
+task uploadApiDocs(group: "upload", dependsOn: generateApiDocs,
+  description: "Uploads the API docs to http://apidoc.stratio.com") << {
+  def username = System.getProperty("apidocUsername")
+  if (username) {
+    def branch = project.releasing.currentShortBranch
+    def host = "intern.stratio.com"
+    def password = System.getProperty("apidocPassword")
+    def remoteDir = "$project.name/$branch/"
+    ant.taskdef(name: "ftp", classname: "org.apache.tools.ant.taskdefs.optional.net.FTP", classpath: configurations.antLibs.asPath)
+    ant.ftp(server: host, userid: username, password: password, verbose: "yes", action: "mkdir", remotedir: remoteDir)
+    ant.ftp(server: host, userid: username, password: password, verbose: "yes", remotedir: remoteDir) {
+      fileset(dir: "$buildDir/generated/html")
+    }
+  } else {
+    logger.warn("Upload skipped - no user credentials provided")
+  }
+}

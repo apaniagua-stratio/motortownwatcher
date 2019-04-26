@@ -1,0 +1,126 @@
+{
+  "volumes": null,
+  "id": "/motortown/motortownwatcher",
+  "cmd": null,
+  "args": null,
+  "user": null,
+  "env": {
+    "VAULT_HOST": "vault.service.anjana.eos",
+    "AS_TRIGGER_MODE": "all",
+    "AS_MIN_INSTANCES": "1",
+    "SPRING_DATASOURCE_USERNAME": "motortown_sync",
+    "CONFIG_SERVER_URI": "",
+    "SCHEDULERRATE": "1800000",
+    "AS_COOL_DOWN_FACTOR": "3",
+    "AS_MICROSERVICE": "true",
+    "AS_MIN_MEM_PERCENT": "60",
+    "AS_MAX_INSTANCES": "1",
+    "SFTPUSER": "motortown_watcher",
+    "AS_MAX_CPU_TIME": "80",
+    "SFTPKEY": "/data/stratio/motortownwatcher.key",
+    "AS_METRICS_PORT_NAME": "metrics",
+    "AS_MAX_MEM_PERCENT": "85",
+    "AS_MIN_CPU_TIME": "60",
+    "SFTPINFOLDER": "/anjana/motortown_pro/ingesta_productos_stock/pendiente/",
+    "AS_AUTOSCALE_MULTIPLIER": "1.5",
+    "SPRING_DATASOURCE_PASSWORD": "",
+    "SPRING_CLOUD_CONFIG_ENABLED": "false",
+    "SFTPOUTFOLDER": "/anjana/motortown_pro/ingesta_productos_stock/en_proceso/",
+    "SFTPHOST": "10.20.1.112",
+    "AS_TRIGGER_NUMBER": "2",
+    "CONFIG_SERVER_NAME": "config-server",
+    "VAULT_PORT": "8200",
+    "SPRING_DATASOURCE_URL": "jdbc:postgresql://poolpostgrestls.marathon.mesos:5432/postgres?user=motortown_sync&prepareThreshold=0&ssl=true&sslmode=verify-ca&sslcert=/data/stratio/motortown_sync.pem&sslrootcert=/data/stratio/ca-bundle.pem&sslkey=/data/stratio/motortown_sync.key.pk8&loginTimeout=60",
+    "spring_profiles_active": "dev,info,default",
+    "DEPLOYMENT_ENV": "dev",
+    "APPROLE": {
+      "secret": "role"
+    }
+  },
+  "instances": 0,
+  "cpus": 0.5,
+  "mem": 1024,
+  "disk": 0,
+  "gpus": 0,
+  "executor": null,
+  "constraints": null,
+  "fetch": null,
+  "storeUrls": null,
+  "backoffSeconds": 1,
+  "backoffFactor": 1.15,
+  "maxLaunchDelaySeconds": 3600,
+  "container": {
+    "docker": {
+      "image": "registry.anjana.local:5001/motortownwatcher:1.0.0-SNAPSHOT-1",
+      "forcePullImage": true,
+      "privileged": false,
+      "parameters": [
+        {
+          "key": "hostname",
+          "value": "motortown-motortownwatcher.cc.anjana.local"
+        }
+      ],
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp",
+          "name": "app",
+          "servicePort": 10124
+        },
+        {
+          "containerPort": 8091,
+          "protocol": "tcp",
+          "name": "metrics",
+          "servicePort": 10125,
+          "labels": {
+            "VIP_1": "/motortown/motortownwatcher:8091"
+          }
+        }
+      ],
+      "network": "USER"
+    },
+    "type": "DOCKER",
+    "volumes": [
+      {
+        "containerPath": "/etc/resolv.conf",
+        "hostPath": "/etc/resolv.conf",
+        "mode": "RO"
+      }
+    ]
+  },
+  "healthChecks": [
+    {
+      "protocol": "HTTP",
+      "path": "/health",
+      "gracePeriodSeconds": 300,
+      "intervalSeconds": 20,
+      "timeoutSeconds": 20,
+      "maxConsecutiveFailures": 10,
+      "portIndex": 1,
+      "ignoreHttp1xx": false
+    }
+  ],
+  "readinessChecks": null,
+  "dependencies": null,
+  "upgradeStrategy": {
+    "minimumHealthCapacity": 1,
+    "maximumOverCapacity": 1
+  },
+  "labels": {
+    "PROMETHEUS_JOB": "motortown.motortownwatcher",
+    "HAPROXY_GROUP": "external",
+    "HAPROXY_0_PORT": "10077",
+    "HAPROXY_0_VHOST": "marathon-lb.marathon.mesos"
+  },
+  "acceptedResourceRoles": null,
+  "ipAddress": {
+    "networkName": "stratio"
+  },
+  "residency": null,
+  "secrets": {
+    "role": {
+      "source": "open"
+    }
+  },
+  "taskKillGracePeriodSeconds": 3
+}
