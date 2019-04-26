@@ -1,7 +1,0 @@
-// Swagger contract file. Use single quotes.
-ext.swaggerApiFilename = 'src/main/swagger/motortownwatcher-contract.yaml'
-
-// Base Java package for generated API source classes.
-// API classes goes to sub-package .api
-// Model classes goes to sub-package .model
-ext.swaggerApiBasePackage = 'com.stratio.microservice.motortownwatcher.generated.rest'
