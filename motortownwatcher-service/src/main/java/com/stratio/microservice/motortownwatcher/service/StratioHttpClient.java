@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -14,6 +13,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -24,7 +24,6 @@ import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.SecureRandom;
@@ -75,7 +74,7 @@ public class StratioHttpClient {
         }
     }
 
-    public static String callSpartaAPI(String sTicket) {
+    public static String getSpartaInfo(String sTicket) {
 
         try {
 
@@ -100,6 +99,51 @@ public class StratioHttpClient {
                     .setParameter("user", sUser);
             uri = builder.build();
             httpget = new HttpGet(uri);
+            HttpResponse apiresponse = loginClient.execute(httpget);
+
+            return EntityUtils.toString(apiresponse.getEntity());
+
+        } catch (URISyntaxException | IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+
+
+    }
+
+    public static String callSpartaAPI(String sTicket) {
+
+        try {
+
+            URIBuilder builder = new URIBuilder();
+            builder.setScheme("https").setHost("sparta.anjana.local/sparta-server").setPath("/login")
+                    .setParameter("code", sTicket);
+
+
+            URI uri = builder.build();
+
+            HttpGet httpget = new HttpGet(uri);
+            HttpClient loginClient = StratioHttpClient.getHttpClient();
+            HttpResponse loginresponse = loginClient.execute(httpget);
+
+
+            Header[] loginjiders= loginresponse.getHeaders("Set-Cookie");
+            String sUser = StringUtils.substringBefore(loginjiders[0].getValue(), ";");
+            sUser = StringUtils.substringAfter(sUser, "=");
+
+            builder = new URIBuilder();
+
+            builder.setScheme("https").setHost("sparta.anjana.local").setPath("/sparta-server/groups/findByName//home/test");
+                    //.addParameter("name", "/home/test");
+
+            uri = builder.build();
+            httpget = new HttpGet("https://sparta.anjana.local/sparta-server/groups/findByName/%2Fhome%2Ftest");
+
+            //httpget.setHeader("User", sUser);
+            httpget.setHeader("Cookie", "user=" + sUser );
+            httpget.setHeader("Accept", "application/json");
+            httpget.setHeader("Content-type", "application/json");
+
             HttpResponse apiresponse = loginClient.execute(httpget);
 
             return EntityUtils.toString(apiresponse.getEntity());
@@ -180,7 +224,7 @@ public class StratioHttpClient {
         return "";
     }
 
-    public static String runSpartaWF(String sTicket, String path, String name, String version) {
+    public static String runSpartaWF(String sTicket, String sId) {
 
         try {
 
@@ -200,28 +244,85 @@ public class StratioHttpClient {
             String sUser = StringUtils.substringBefore(loginjiders[0].getValue(), ";");
             sUser = StringUtils.substringAfter(sUser, "=");
 
-            HttpPost post = new HttpPost("https://sparta.anjana.local/sparta-server/workflows/find");
 
-            post.addHeader("User", sUser);
+           // run workflow id
 
-            List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-            urlParameters.add(new BasicNameValuePair("name", name));
-            urlParameters.add(new BasicNameValuePair("version", version));
-            urlParameters.add(new BasicNameValuePair("group", path));
+            HttpPost runpost = new HttpPost(String.format("https://sparta.anjana.local/sparta-server/workflows/run/%s",sId));
 
-            post.setEntity(new UrlEncodedFormEntity(urlParameters));
+            runpost.setHeader("Cookie", "user=" + sUser );
+            runpost.setHeader("Accept", "application/json");
+            runpost.setHeader("Content-type", "application/json");
 
+            HttpResponse runresponse = loginClient.execute(runpost);
 
-            HttpResponse apiresponse = loginClient.execute(post);
+            String runResult= EntityUtils.toString(runresponse.getEntity());
 
-            return EntityUtils.toString(apiresponse.getEntity());
+            return runResult;
+
 
         } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
         }
         return "";
 
+    }
+
+
+    public static String getSpartaWFId(String sTicket, String path, String name, String version) {
+
+        try {
+
+            URIBuilder builder = new URIBuilder();
+            builder.setScheme("https").setHost("sparta.anjana.local/sparta-server").setPath("/login")
+                    .setParameter("code", sTicket);
+
+
+            URI uri = builder.build();
+
+            HttpGet httpget = new HttpGet(uri);
+            HttpClient loginClient = StratioHttpClient.getHttpClient();
+            HttpResponse loginresponse = loginClient.execute(httpget);
+
+
+            Header[] loginjiders= loginresponse.getHeaders("Set-Cookie");
+            String sUser = StringUtils.substringBefore(loginjiders[0].getValue(), ";");
+            sUser = StringUtils.substringAfter(sUser, "=");
+
+
+            // get workflow id
+            HttpPost post = new HttpPost("https://sparta.anjana.local/sparta-server/workflows/find");
+
+            post.setHeader("Cookie", "user=" + sUser );
+            post.setHeader("Accept", "application/json");
+            post.setHeader("Content-type", "application/json");
+
+            //List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+            //urlParameters.add(new BasicNameValuePair("name", name));
+            //urlParameters.add(new BasicNameValuePair("version", version));
+            //urlParameters.add(new BasicNameValuePair("group", path));
+
+            String body=String.format("{\"name\":\"%s\",\"version\":\"%s\",\"group\":\"%s\"}",name,version,path);
+
+
+            //post.setEntity(new UrlEncodedFormEntity(urlParameters));
+            post.setEntity(new StringEntity(body));
+
+            HttpResponse apiresponse = loginClient.execute(post);
+
+            String apiResult= EntityUtils.toString(apiresponse.getEntity());
+
+            String sId = StringUtils.substringAfter(apiResult, "\"id\":\"");
+            sId = StringUtils.substringBefore(sId,"\",\"");
+
+            return sId;
+
+
+        } catch (URISyntaxException | IOException e) {
+            e.printStackTrace();
+        }
+        return "";
 
     }
+
 
 }

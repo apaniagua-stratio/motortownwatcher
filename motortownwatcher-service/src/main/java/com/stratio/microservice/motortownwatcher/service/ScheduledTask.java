@@ -138,7 +138,8 @@ public class ScheduledTask {
 
         String sTicket=StratioHttpClient.getDCOSTicket();
 
-        String resul=StratioHttpClient.runSpartaWF(sTicket,wf_path,wf_name,wf_version);
+        String resul=StratioHttpClient.getSpartaWFId(sTicket,wf_path,wf_name,wf_version);
+        //String resul=StratioHttpClient.callSpartaAPI(sTicket);
         System.out.println(resul);
 
         return "";
