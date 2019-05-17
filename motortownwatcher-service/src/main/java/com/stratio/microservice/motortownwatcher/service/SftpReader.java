@@ -203,7 +203,7 @@ public class SftpReader {
                         Scanner scanner = new Scanner(in);
                         while (scanner.hasNextLine()) {
                             String line = scanner.nextLine();
-                            CsvRow row = new CsvRow(line, entry.getName());
+                            CsvRow row = new CsvRow(line, entry.getName(),remoteZipFile);
                             rowsReaded.add(row);
                         }
                     //}

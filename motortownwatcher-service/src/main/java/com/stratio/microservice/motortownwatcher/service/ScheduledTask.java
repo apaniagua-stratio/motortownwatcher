@@ -72,14 +72,6 @@ public class ScheduledTask {
 
         log.info("AURGI Scheduled job at: " + dateFormat.format(new Date()));
 
-        System.out.println("GOES....................................");
-        //getSpartaVersion();
-        runWorkflow("home/test","workflow-name","1");
-        //System.out.println(startSpartaWF());
-        System.out.println("END.....................................");
-
-        /*
-
         SftpReader reader = new SftpReader();
 
         List<Csvfile> listaZip=reader.listZipFileFromSftp(sftpuser,sftphost,sftpkey,sftpinfolder);
@@ -112,13 +104,13 @@ public class ScheduledTask {
                 csvrowrepo.save(rows);
 
                 log.info("AURGI:  " + rows.size() +  " csv rows written in PG table. ");
+                break;
 
             }
         }
 
         if (!found) log.info("AURGI no new files were detected on SFTP. ");
 
-        */
 
         log.info("AURGI scheduled job end.");
 
@@ -139,7 +131,8 @@ public class ScheduledTask {
         String sTicket=StratioHttpClient.getDCOSTicket();
 
         String resul=StratioHttpClient.getSpartaWFId(sTicket,wf_path,wf_name,wf_version);
-        //String resul=StratioHttpClient.callSpartaAPI(sTicket);
+        System.out.println(resul);
+        resul=StratioHttpClient.runSpartaWF(sTicket,resul);
         System.out.println(resul);
 
         return "";
