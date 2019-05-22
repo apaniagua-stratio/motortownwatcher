@@ -34,7 +34,9 @@ sftpkey: /home/apaniagua/.ssh/id_rsa
 sftpinfolder: /anjana/motortown_pro/ingesta_productos_stock/pendiente/
 sftpoutfolder: /anjana/motortown_pro/ingesta_productos_stock/en_proceso/
 schedulerRate: 1800000
-
+spartawfpath: /motortown
+spartawfname: motortown-recalculo
+spartawfversion: 16
 
 spring.jpa.properties.hibernate.jdbc.batch_size : 50
 spring.jpa.properties.hibernate.order_inserts : true

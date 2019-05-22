@@ -224,7 +224,7 @@ public class StratioHttpClient {
         return "";
     }
 
-    public static String runSpartaWF(String sTicket, String sId) {
+    public static String runSpartaWF(String sTicket, String path,String name,int version) {
 
         try {
 
@@ -244,6 +244,30 @@ public class StratioHttpClient {
             String sUser = StringUtils.substringBefore(loginjiders[0].getValue(), ";");
             sUser = StringUtils.substringAfter(sUser, "=");
 
+            // get wrokfow id
+            HttpPost post = new HttpPost("https://sparta.anjana.local/sparta-server/workflows/find");
+
+            post.setHeader("Cookie", "user=" + sUser );
+            post.setHeader("Accept", "application/json");
+            post.setHeader("Content-type", "application/json");
+
+            //List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+            //urlParameters.add(new BasicNameValuePair("name", name));
+            //urlParameters.add(new BasicNameValuePair("version", version));
+            //urlParameters.add(new BasicNameValuePair("group", path));
+
+            String body=String.format("{\"name\":\"%s\",\"version\":%s,\"group\":\"%s\"}",name,version,path);
+
+
+            //post.setEntity(new UrlEncodedFormEntity(urlParameters));
+            post.setEntity(new StringEntity(body));
+
+            HttpResponse apiresponse = loginClient.execute(post);
+
+            String apiResult= EntityUtils.toString(apiresponse.getEntity());
+
+            String sId = StringUtils.substringAfter(apiResult, "\"id\":\"");
+            sId = StringUtils.substringBefore(sId,"\",\"");
 
            // run workflow id
 

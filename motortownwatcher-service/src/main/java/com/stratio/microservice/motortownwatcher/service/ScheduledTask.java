@@ -58,6 +58,15 @@ public class ScheduledTask {
     @Value("${sftpoutfolder}")
     private String sftpoutfolder;
 
+    @Value("${spartawfpath}")
+    private String spartawfpath;
+
+    @Value("${spartawfname}")
+    private String spartawfname;
+
+    @Value("${spartawfversion}")
+    private int spartawfversion;
+
     private static final SimpleDateFormat dateFormat=new SimpleDateFormat("HH:mm:ss");
 
     @Autowired
@@ -104,6 +113,9 @@ public class ScheduledTask {
                 csvrowrepo.save(rows);
 
                 log.info("AURGI:  " + rows.size() +  " csv rows written in PG table. ");
+
+                log.info("AURGI SPARTA: " + runWorkflow(spartawfpath,spartawfname,spartawfversion));
+
                 break;
 
             }
@@ -126,16 +138,16 @@ public class ScheduledTask {
         return "";
     }
 
-    private String runWorkflow(String wf_path, String wf_name,String wf_version) {
+    private String runWorkflow(String wf_path, String wf_name,int wf_version) {
 
         String sTicket=StratioHttpClient.getDCOSTicket();
 
-        String resul=StratioHttpClient.getSpartaWFId(sTicket,wf_path,wf_name,wf_version);
-        System.out.println(resul);
-        resul=StratioHttpClient.runSpartaWF(sTicket,resul);
-        System.out.println(resul);
+        //String resul=StratioHttpClient.getSpartaWFId(sTicket,wf_path,wf_name,wf_version);
 
-        return "";
+        String resul=StratioHttpClient.runSpartaWF(sTicket,wf_path,wf_name,wf_version);
+
+
+        return "Execution id: " +  resul;
     }
 
     private String startSpartaWF() {
