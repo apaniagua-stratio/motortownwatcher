@@ -34,7 +34,8 @@ import java.util.List;
 public class StratioHttpClient {
 
     final static String sRequestAuth= "https://cc.anjana.local/sso/login?service=https%3A%2F%2Fcc.anjana.local%2Fsso%2Foauth2.0%2FcallbackAuthorize";
-
+    final static String FINISHED_STATE = "Finished";
+    final static String FAILED_STATE = "Failed";
 
     public static HttpClient getHttpClient() {
 
@@ -251,11 +252,6 @@ public class StratioHttpClient {
             post.setHeader("Accept", "application/json");
             post.setHeader("Content-type", "application/json");
 
-            //List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-            //urlParameters.add(new BasicNameValuePair("name", name));
-            //urlParameters.add(new BasicNameValuePair("version", version));
-            //urlParameters.add(new BasicNameValuePair("group", path));
-
             String body=String.format("{\"name\":\"%s\",\"version\":%s,\"group\":\"%s\"}",name,version,path);
 
 
@@ -280,17 +276,55 @@ public class StratioHttpClient {
             HttpResponse runresponse = loginClient.execute(runpost);
 
             String runResult= EntityUtils.toString(runresponse.getEntity());
+            String sExecutionId = StringUtils.substringAfter(runResult, "\"");
+            sExecutionId = StringUtils.substringBefore(sExecutionId,"\"");
 
-            return runResult;
+            //TODO: wait until completion, retry 3 times
+            HttpGet execpost = new HttpGet(String.format("https://sparta.anjana.local/sparta-server/workflowExecutions/%s",sExecutionId));
+
+            execpost.setHeader("Cookie", "user=" + sUser );
+            execpost.setHeader("Accept", "application/json");
+            execpost.setHeader("Content-type", "application/json");
+
+            HttpResponse execresponse = loginClient.execute(execpost);
+            String execResult= EntityUtils.toString(execresponse.getEntity());
+
+            String lastState=parseWfState(execResult);
+
+            //wait for completion
+            while (!lastState.equalsIgnoreCase(FINISHED_STATE) && !lastState.equalsIgnoreCase(FAILED_STATE)) {
+                Thread.sleep(10000);
+
+                //HttpGet execpost2 = new HttpGet(String.format("https://sparta.anjana.local/sparta-server/workflowExecutions/%s",sExecutionId));
+                //execpost2.setHeader("Cookie", "user=" + sUser );
+                //execpost2.setHeader("Accept", "application/json");
+                //execpost2.setHeader("Content-type", "application/json");
+
+                HttpResponse execresponse2 = loginClient.execute(execpost);
+                execResult= EntityUtils.toString(execresponse2.getEntity());
+                lastState=parseWfState(execResult);
+                
+            }
+
+            return lastState;
 
 
-        } catch (URISyntaxException | IOException e) {
+        } catch (URISyntaxException | IOException | InterruptedException e) {
             e.printStackTrace();
         }
         return "";
 
     }
 
+    private static String parseWfState(String execResult) {
+
+        //{"id":"9ac7e2a3-fd9c-4f3b-9d8c-cbec1acb5d12","statuses":[{"state":"Finished"
+
+        String state = StringUtils.substringAfter(execResult, "\"state\":\"");
+        state = StringUtils.substringBefore(state,"\"");
+
+        return state;
+    }
 
     public static String getSpartaWFId(String sTicket, String path, String name, String version) {
 

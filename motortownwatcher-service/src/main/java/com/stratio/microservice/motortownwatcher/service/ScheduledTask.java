@@ -4,38 +4,23 @@ import com.stratio.microservice.motortownwatcher.entity.CsvRow;
 import com.stratio.microservice.motortownwatcher.entity.Csvfile;
 import com.stratio.microservice.motortownwatcher.repository.CsvfileRepository;
 import com.stratio.microservice.motortownwatcher.repository.CsvrowRepository;
-import com.stratio.microservice.motortownwatcher.repository.CsvrowRepository_old;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.EntityBuilder;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.swing.text.html.parser.Entity;
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -45,27 +30,23 @@ public class ScheduledTask {
 
     @Value("${sftphost}")
     private String sftphost;
-
     @Value("${sftpuser}")
     private String sftpuser;
-
     @Value("${sftpkey}")
     private String sftpkey;
-
     @Value("${sftpinfolder}")
     private String sftpinfolder;
-
     @Value("${sftpoutfolder}")
     private String sftpoutfolder;
-
     @Value("${spartawfpath}")
     private String spartawfpath;
-
     @Value("${spartawfname}")
     private String spartawfname;
-
     @Value("${spartawfversion}")
     private int spartawfversion;
+    @Value("${spartaretries}")
+    private int spartaretries;
+
 
     private static final SimpleDateFormat dateFormat=new SimpleDateFormat("HH:mm:ss");
 
@@ -79,7 +60,7 @@ public class ScheduledTask {
     @Scheduled(fixedRateString = "${schedulerRate}")
     public void ingestFromSftp() {
 
-        log.info("AURGI Scheduled job at: " + dateFormat.format(new Date()));
+        log.info("AURGI: Scheduled job start at: " + dateFormat.format(new Date()));
 
         SftpReader reader = new SftpReader();
 
@@ -99,22 +80,29 @@ public class ScheduledTask {
                 log.info("AURGI FILE: " + file.filename +  "don't exist in DB so will be added. ");
 
                 //unzip the csvs in zip
+                log.info("AURGI FILE: unzippin " + file.filename +  " on folder " + sftpoutfolder);
                 List<CsvRow> rows= new ArrayList<>();
                 rows=reader.unzipFileFromSftp(sftpuser,sftphost,sftpkey,sftpinfolder + file.filename,sftpoutfolder);
                 found = true;
 
                 //save the rows of all csvs to table
-
-                log.info("AURGI:  start writing to PG this number of entities" + rows.size());
-                //csvrowrepo.saveAll(rows);
-
+                log.info("AURGI POSTGRES:  start writing to PG this number of entities" + rows.size());
                 csvrowrepo.deleteAllInBatch();
                 csvrowrepo.flush();
                 csvrowrepo.save(rows);
+                log.info("AURGI POSTGRES:  " + rows.size() +  " csv rows written in PG table. ");
 
-                log.info("AURGI:  " + rows.size() +  " csv rows written in PG table. ");
+                int currentTry=1;
+                String result = "";
+                while (currentTry <= spartaretries && !result.equalsIgnoreCase("Finished")) {
 
-                log.info("AURGI SPARTA: " + runWorkflow(spartawfpath,spartawfname,spartawfversion));
+                    log.info("AURGI SPARTA: running " + spartawfname + " v" + spartawfversion + " execution number " + currentTry);
+                    result=runWorkflow(spartawfpath,spartawfname,spartawfversion);
+                    log.info("AURGI SPARTA: " + spartawfname + " v" + spartawfversion + " execution number " + currentTry +  " finished with state " + result);
+                    currentTry++;
+                }
+
+                log.info("AURGI SPARTA: finished with state " + result);
 
                 break;
 
@@ -124,7 +112,7 @@ public class ScheduledTask {
         if (!found) log.info("AURGI no new files were detected on SFTP. ");
 
 
-        log.info("AURGI scheduled job end.");
+        log.info("AURGI: scheduled job end at: " + dateFormat.format(new Date()));
 
     }
 
@@ -142,12 +130,9 @@ public class ScheduledTask {
 
         String sTicket=StratioHttpClient.getDCOSTicket();
 
-        //String resul=StratioHttpClient.getSpartaWFId(sTicket,wf_path,wf_name,wf_version);
-
         String resul=StratioHttpClient.runSpartaWF(sTicket,wf_path,wf_name,wf_version);
 
-
-        return "Execution id: " +  resul;
+        return resul;
     }
 
     private String startSpartaWF() {

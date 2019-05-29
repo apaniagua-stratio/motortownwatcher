@@ -36,7 +36,8 @@ sftpoutfolder: /anjana/motortown_pro/ingesta_productos_stock/en_proceso/
 schedulerRate: 1800000
 spartawfpath: /motortown
 spartawfname: motortown-recalculo
-spartawfversion: 16
+spartawfversion: 17
+spartaretries: 3
 
 spring.jpa.properties.hibernate.jdbc.batch_size : 50
 spring.jpa.properties.hibernate.order_inserts : true
