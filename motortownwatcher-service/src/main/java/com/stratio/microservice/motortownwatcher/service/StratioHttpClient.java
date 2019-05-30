@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -33,7 +34,7 @@ import java.util.List;
 
 public class StratioHttpClient {
 
-    final static String sRequestAuth= "https://cc.anjana.local/sso/login?service=https%3A%2F%2Fcc.anjana.local%2Fsso%2Foauth2.0%2FcallbackAuthorize";
+    final static String sRequestAuth = "https://cc.anjana.local/sso/login?service=https%3A%2F%2Fcc.anjana.local%2Fsso%2Foauth2.0%2FcallbackAuthorize";
     final static String FINISHED_STATE = "Finished";
     final static String FAILED_STATE = "Failed";
 
@@ -60,7 +61,7 @@ public class StratioHttpClient {
                         }
                     }}, new SecureRandom());
 
-            SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext,SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+            SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 
             HttpClient httpClient = HttpClientBuilder.create()
                     .setSSLSocketFactory(socketFactory)
@@ -91,7 +92,7 @@ public class StratioHttpClient {
             HttpResponse loginresponse = loginClient.execute(httpget);
 
 
-            Header[] loginjiders= loginresponse.getHeaders("Set-Cookie");
+            Header[] loginjiders = loginresponse.getHeaders("Set-Cookie");
             String sUser = StringUtils.substringBefore(loginjiders[0].getValue(), ";");
             sUser = StringUtils.substringAfter(sUser, "=");
 
@@ -128,20 +129,20 @@ public class StratioHttpClient {
             HttpResponse loginresponse = loginClient.execute(httpget);
 
 
-            Header[] loginjiders= loginresponse.getHeaders("Set-Cookie");
+            Header[] loginjiders = loginresponse.getHeaders("Set-Cookie");
             String sUser = StringUtils.substringBefore(loginjiders[0].getValue(), ";");
             sUser = StringUtils.substringAfter(sUser, "=");
 
             builder = new URIBuilder();
 
             builder.setScheme("https").setHost("sparta.anjana.local").setPath("/sparta-server/groups/findByName//home/test");
-                    //.addParameter("name", "/home/test");
+            //.addParameter("name", "/home/test");
 
             uri = builder.build();
             httpget = new HttpGet("https://sparta.anjana.local/sparta-server/groups/findByName/%2Fhome%2Ftest");
 
             //httpget.setHeader("User", sUser);
-            httpget.setHeader("Cookie", "user=" + sUser );
+            httpget.setHeader("Cookie", "user=" + sUser);
             httpget.setHeader("Accept", "application/json");
             httpget.setHeader("Content-type", "application/json");
 
@@ -159,15 +160,15 @@ public class StratioHttpClient {
 
     public static String getDCOSTicket() {
 
-        final String spartaUser="fjurado";
-        final String spartaPassEncrypted="%3C%28%7Dx7wE%28U%27DZ%3Etv%3D";
+        final String spartaUser = "fjurado";
+        final String spartaPassEncrypted = "%3C%28%7Dx7wE%28U%27DZ%3Etv%3D";
 
-        String sCookie="";
-        String sLT="";
+        String sCookie = "";
+        String sLT = "";
         String sExecution;
 
-        String sTicket="";
-        String sUser ="";
+        String sTicket = "";
+        String sUser = "";
 
         try {
 
@@ -177,18 +178,18 @@ public class StratioHttpClient {
             response = client.execute(request);
 
             //---------------------------- get jsession from header
-            Header[] jider=response.getHeaders("Set-Cookie");
+            Header[] jider = response.getHeaders("Set-Cookie");
             sCookie = StringUtils.substringBefore(jider[0].getValue(), ";");
 
             //-----------------------------get lt and execution from content
-            InputStream inputStream=response.getEntity().getContent();
+            InputStream inputStream = response.getEntity().getContent();
 
             StringWriter writer = new StringWriter();
             IOUtils.copy(inputStream, writer, "UTF-8");
             String htmlString = writer.toString();
 
-            sLT = StringUtils.substringBetween(htmlString,"input type=\"hidden\" name=\"lt\" value=\"","\" />");
-            sExecution = StringUtils.substringBetween(htmlString,"<input type=\"hidden\" name=\"execution\" value=\"","\" />");
+            sLT = StringUtils.substringBetween(htmlString, "input type=\"hidden\" name=\"lt\" value=\"", "\" />");
+            sExecution = StringUtils.substringBetween(htmlString, "<input type=\"hidden\" name=\"execution\" value=\"", "\" />");
 
             // --------------------- POST -----------------------------
 
@@ -211,21 +212,20 @@ public class StratioHttpClient {
             HttpResponse postresponse = client.execute(post);
 
 
-            Header[] postjiders= postresponse.getHeaders("Location");
+            Header[] postjiders = postresponse.getHeaders("Location");
             //get jsession from header
 
             sTicket = StringUtils.substringAfter(postjiders[0].getValue(), "ticket=");
             return sTicket;
 
-        }
-        catch (UnsupportedOperationException | IOException e) {
+        } catch (UnsupportedOperationException | IOException e) {
             e.printStackTrace();
         }
 
         return "";
     }
 
-    public static String runSpartaWF(String sTicket, String path,String name,int version) {
+    public static String runSpartaWF(String sTicket, String path, String name, int version) {
 
         try {
 
@@ -241,18 +241,18 @@ public class StratioHttpClient {
             HttpResponse loginresponse = loginClient.execute(httpget);
 
 
-            Header[] loginjiders= loginresponse.getHeaders("Set-Cookie");
+            Header[] loginjiders = loginresponse.getHeaders("Set-Cookie");
             String sUser = StringUtils.substringBefore(loginjiders[0].getValue(), ";");
             sUser = StringUtils.substringAfter(sUser, "=");
 
             // get wrokfow id
             HttpPost post = new HttpPost("https://sparta.anjana.local/sparta-server/workflows/find");
 
-            post.setHeader("Cookie", "user=" + sUser );
+            post.setHeader("Cookie", "user=" + sUser);
             post.setHeader("Accept", "application/json");
             post.setHeader("Content-type", "application/json");
 
-            String body=String.format("{\"name\":\"%s\",\"version\":%s,\"group\":\"%s\"}",name,version,path);
+            String body = String.format("{\"name\":\"%s\",\"version\":%s,\"group\":\"%s\"}", name, version, path);
 
 
             //post.setEntity(new UrlEncodedFormEntity(urlParameters));
@@ -260,36 +260,36 @@ public class StratioHttpClient {
 
             HttpResponse apiresponse = loginClient.execute(post);
 
-            String apiResult= EntityUtils.toString(apiresponse.getEntity());
+            String apiResult = EntityUtils.toString(apiresponse.getEntity());
 
             String sId = StringUtils.substringAfter(apiResult, "\"id\":\"");
-            sId = StringUtils.substringBefore(sId,"\",\"");
+            sId = StringUtils.substringBefore(sId, "\",\"");
 
-           // run workflow id
+            // run workflow id
 
-            HttpPost runpost = new HttpPost(String.format("https://sparta.anjana.local/sparta-server/workflows/run/%s",sId));
+            HttpPost runpost = new HttpPost(String.format("https://sparta.anjana.local/sparta-server/workflows/run/%s", sId));
 
-            runpost.setHeader("Cookie", "user=" + sUser );
+            runpost.setHeader("Cookie", "user=" + sUser);
             runpost.setHeader("Accept", "application/json");
             runpost.setHeader("Content-type", "application/json");
 
             HttpResponse runresponse = loginClient.execute(runpost);
 
-            String runResult= EntityUtils.toString(runresponse.getEntity());
+            String runResult = EntityUtils.toString(runresponse.getEntity());
             String sExecutionId = StringUtils.substringAfter(runResult, "\"");
-            sExecutionId = StringUtils.substringBefore(sExecutionId,"\"");
+            sExecutionId = StringUtils.substringBefore(sExecutionId, "\"");
 
             //TODO: wait until completion, retry 3 times
-            HttpGet execpost = new HttpGet(String.format("https://sparta.anjana.local/sparta-server/workflowExecutions/%s",sExecutionId));
+            HttpGet execpost = new HttpGet(String.format("https://sparta.anjana.local/sparta-server/workflowExecutions/%s", sExecutionId));
 
-            execpost.setHeader("Cookie", "user=" + sUser );
+            execpost.setHeader("Cookie", "user=" + sUser);
             execpost.setHeader("Accept", "application/json");
             execpost.setHeader("Content-type", "application/json");
 
             HttpResponse execresponse = loginClient.execute(execpost);
-            String execResult= EntityUtils.toString(execresponse.getEntity());
+            String execResult = EntityUtils.toString(execresponse.getEntity());
 
-            String lastState=parseWfState(execResult);
+            String lastState = parseWfState(execResult);
 
             //wait for completion
             while (!lastState.equalsIgnoreCase(FINISHED_STATE) && !lastState.equalsIgnoreCase(FAILED_STATE)) {
@@ -301,9 +301,9 @@ public class StratioHttpClient {
                 //execpost2.setHeader("Content-type", "application/json");
 
                 HttpResponse execresponse2 = loginClient.execute(execpost);
-                execResult= EntityUtils.toString(execresponse2.getEntity());
-                lastState=parseWfState(execResult);
-                
+                execResult = EntityUtils.toString(execresponse2.getEntity());
+                lastState = parseWfState(execResult);
+
             }
 
             return lastState;
@@ -321,7 +321,7 @@ public class StratioHttpClient {
         //{"id":"9ac7e2a3-fd9c-4f3b-9d8c-cbec1acb5d12","statuses":[{"state":"Finished"
 
         String state = StringUtils.substringAfter(execResult, "\"state\":\"");
-        state = StringUtils.substringBefore(state,"\"");
+        state = StringUtils.substringBefore(state, "\"");
 
         return state;
     }
@@ -342,7 +342,7 @@ public class StratioHttpClient {
             HttpResponse loginresponse = loginClient.execute(httpget);
 
 
-            Header[] loginjiders= loginresponse.getHeaders("Set-Cookie");
+            Header[] loginjiders = loginresponse.getHeaders("Set-Cookie");
             String sUser = StringUtils.substringBefore(loginjiders[0].getValue(), ";");
             sUser = StringUtils.substringAfter(sUser, "=");
 
@@ -350,7 +350,7 @@ public class StratioHttpClient {
             // get workflow id
             HttpPost post = new HttpPost("https://sparta.anjana.local/sparta-server/workflows/find");
 
-            post.setHeader("Cookie", "user=" + sUser );
+            post.setHeader("Cookie", "user=" + sUser);
             post.setHeader("Accept", "application/json");
             post.setHeader("Content-type", "application/json");
 
@@ -359,7 +359,7 @@ public class StratioHttpClient {
             //urlParameters.add(new BasicNameValuePair("version", version));
             //urlParameters.add(new BasicNameValuePair("group", path));
 
-            String body=String.format("{\"name\":\"%s\",\"version\":\"%s\",\"group\":\"%s\"}",name,version,path);
+            String body = String.format("{\"name\":\"%s\",\"version\":\"%s\",\"group\":\"%s\"}", name, version, path);
 
 
             //post.setEntity(new UrlEncodedFormEntity(urlParameters));
@@ -367,10 +367,10 @@ public class StratioHttpClient {
 
             HttpResponse apiresponse = loginClient.execute(post);
 
-            String apiResult= EntityUtils.toString(apiresponse.getEntity());
+            String apiResult = EntityUtils.toString(apiresponse.getEntity());
 
             String sId = StringUtils.substringAfter(apiResult, "\"id\":\"");
-            sId = StringUtils.substringBefore(sId,"\",\"");
+            sId = StringUtils.substringBefore(sId, "\",\"");
 
             return sId;
 
@@ -381,6 +381,25 @@ public class StratioHttpClient {
         return "";
 
     }
+
+
+    public static String httpGET(String URL) {
+
+        try {
+
+            HttpGet httpget = new HttpGet(URL);
+            HttpClient loginClient = StratioHttpClient.getHttpClient();
+            HttpResponse response = loginClient.execute(httpget);
+            return EntityUtils.toString(response.getEntity());
+        }
+        catch(IOException  e)
+        {
+            e.printStackTrace();
+        }
+
+        return"";
+
+}
 
 
 }

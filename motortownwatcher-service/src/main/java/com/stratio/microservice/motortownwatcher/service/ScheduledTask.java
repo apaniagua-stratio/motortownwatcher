@@ -46,6 +46,9 @@ public class ScheduledTask {
     private int spartawfversion;
     @Value("${spartaretries}")
     private int spartaretries;
+    @Value("${motortownsync}")
+    private String motortownsync;
+
 
 
     private static final SimpleDateFormat dateFormat=new SimpleDateFormat("HH:mm:ss");
@@ -60,10 +63,10 @@ public class ScheduledTask {
     @Scheduled(fixedRateString = "${schedulerRate}")
     public void ingestFromSftp() {
 
+
         log.info("AURGI: Scheduled job start at: " + dateFormat.format(new Date()));
 
         SftpReader reader = new SftpReader();
-
         List<Csvfile> listaZip=reader.listZipFileFromSftp(sftpuser,sftphost,sftpkey,sftpinfolder);
 
         boolean found=false;
@@ -79,13 +82,11 @@ public class ScheduledTask {
                 csvrepo.save(file);
                 log.info("AURGI FILE: " + file.filename +  "don't exist in DB so will be added. ");
 
-                //unzip the csvs in zip
                 log.info("AURGI FILE: unzippin " + file.filename +  " on folder " + sftpoutfolder);
                 List<CsvRow> rows= new ArrayList<>();
                 rows=reader.unzipFileFromSftp(sftpuser,sftphost,sftpkey,sftpinfolder + file.filename,sftpoutfolder);
                 found = true;
 
-                //save the rows of all csvs to table
                 log.info("AURGI POSTGRES:  start writing to PG this number of entities" + rows.size());
                 csvrowrepo.deleteAllInBatch();
                 csvrowrepo.flush();
@@ -104,6 +105,10 @@ public class ScheduledTask {
 
                 log.info("AURGI SPARTA: finished with state " + result);
 
+                log.info("AURGI SYNC: calling motortown microservice");
+                log.info("AURGI SYNC: motortownync " + StratioHttpClient.httpGET(motortownsync));
+
+
                 break;
 
             }
@@ -114,7 +119,11 @@ public class ScheduledTask {
 
         log.info("AURGI: scheduled job end at: " + dateFormat.format(new Date()));
 
+
+
+
     }
+
 
     private String getSpartaVersion() {
 
@@ -156,8 +165,6 @@ public class ScheduledTask {
             HttpResponse response = null;
             try {
                 response = client.execute(request);
-
-
 
                 //---------------------------- get jsession from header
                 Header[] jider=response.getHeaders("Set-Cookie");
