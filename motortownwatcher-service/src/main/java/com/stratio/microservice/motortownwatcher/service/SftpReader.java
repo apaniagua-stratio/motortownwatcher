@@ -7,9 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,7 +25,6 @@ public class SftpReader {
     public List<String> readCsvFileFromSftp(String user,String host, String sftpkey, String remoteFile)
     {
 
-        //2019_04_04_03_30.zip
         int port=22;
 
         try
@@ -69,7 +66,6 @@ public class SftpReader {
             String line;
             while ((line = br.readLine()) != null)
             {
-                //System.out.println(line);
                 strings.add(line);
             }
             br.close();
@@ -194,7 +190,6 @@ public class SftpReader {
                     inputStreams.add(in);
                     inputFilenames.add(entry.getName());
 
-
                     Scanner scanner = new Scanner(in);
                     while (scanner.hasNextLine()) {
                         String line = scanner.nextLine();
@@ -207,7 +202,6 @@ public class SftpReader {
                 }
             }
 
-
             sftpChannel.disconnect();
             log.info("AURGI: SFTP GET CHANNEL DISCONNECT");
 
@@ -216,7 +210,6 @@ public class SftpReader {
             sftpPutChannel.connect();
 
             log.info("AURGI: SFTP PUT CHANNEL CONNECT");
-
 
 
             for (int i = 0; i < inputFilenames.size(); i++) {

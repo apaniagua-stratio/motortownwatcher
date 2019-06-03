@@ -294,11 +294,6 @@ public class StratioHttpClient {
             while (!lastState.equalsIgnoreCase(FINISHED_STATE) && !lastState.equalsIgnoreCase(FAILED_STATE)) {
                 Thread.sleep(10000);
 
-                //HttpGet execpost2 = new HttpGet(String.format("https://sparta.anjana.local/sparta-server/workflowExecutions/%s",sExecutionId));
-                //execpost2.setHeader("Cookie", "user=" + sUser );
-                //execpost2.setHeader("Accept", "application/json");
-                //execpost2.setHeader("Content-type", "application/json");
-
                 HttpResponse execresponse2 = loginClient.execute(execpost);
                 execResult = EntityUtils.toString(execresponse2.getEntity());
                 lastState = parseWfState(execResult);
@@ -316,8 +311,6 @@ public class StratioHttpClient {
     }
 
     private static String parseWfState(String execResult) {
-
-        //{"id":"9ac7e2a3-fd9c-4f3b-9d8c-cbec1acb5d12","statuses":[{"state":"Finished"
 
         String state = StringUtils.substringAfter(execResult, "\"state\":\"");
         state = StringUtils.substringBefore(state, "\"");
@@ -353,15 +346,9 @@ public class StratioHttpClient {
             post.setHeader("Accept", "application/json");
             post.setHeader("Content-type", "application/json");
 
-            //List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-            //urlParameters.add(new BasicNameValuePair("name", name));
-            //urlParameters.add(new BasicNameValuePair("version", version));
-            //urlParameters.add(new BasicNameValuePair("group", path));
 
             String body = String.format("{\"name\":\"%s\",\"version\":\"%s\",\"group\":\"%s\"}", name, version, path);
 
-
-            //post.setEntity(new UrlEncodedFormEntity(urlParameters));
             post.setEntity(new StringEntity(body));
 
             HttpResponse apiresponse = loginClient.execute(post);
