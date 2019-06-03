@@ -194,19 +194,13 @@ public class SftpReader {
                     inputStreams.add(in);
                     inputFilenames.add(entry.getName());
 
-                    //add row from csv to readed list
-                    //motortown_stock_por_centro.csv
-                    //motortown_productos_y_servicios.csv
 
-                    //if (entry.getName().equalsIgnoreCase("motortown_stock_por_centro.csv")) {
-
-                        Scanner scanner = new Scanner(in);
-                        while (scanner.hasNextLine()) {
-                            String line = scanner.nextLine();
-                            CsvRow row = new CsvRow(line, entry.getName(),remoteZipFile);
-                            rowsReaded.add(row);
-                        }
-                    //}
+                    Scanner scanner = new Scanner(in);
+                    while (scanner.hasNextLine()) {
+                        String line = scanner.nextLine();
+                        CsvRow row = new CsvRow(line, entry.getName(),remoteZipFile);
+                        rowsReaded.add(row);
+                    }
 
                     zipInputStream.closeEntry();
                     entry = zipInputStream.getNextEntry();

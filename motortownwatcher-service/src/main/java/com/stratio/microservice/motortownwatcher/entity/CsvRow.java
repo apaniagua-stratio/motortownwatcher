@@ -31,14 +31,4 @@ public class CsvRow {
         this.originalfile=originalfile;
     }
 
-    /*
-    @Override
-    public String toString() {
-        return String.format(
-                "Csvrow[content=%s, date='%s']",
-                rowcontent, processts);
-    }
-
-     */
-
 }
