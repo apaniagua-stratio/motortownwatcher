@@ -34,15 +34,7 @@ public class ServiceImpl implements com.stratio.microservice.motortownwatcher.se
 
   }
 
-  @Override
-  public int writeFilelistTable() {
 
-    csvrepo.save(new Csvfile("hey","20190404"));
-    return csvrepo.findByfilename("hey").size();
-
-    //return csvrepo.findList().size();
-
-  }
 
 
 }

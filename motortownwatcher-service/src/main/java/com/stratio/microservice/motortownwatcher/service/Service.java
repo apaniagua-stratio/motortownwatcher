@@ -7,8 +7,6 @@ public interface Service {
 
   List<String> listFilesInSftp(String remotepath);
 
-  int writeFilelistTable();
-
 
 
 

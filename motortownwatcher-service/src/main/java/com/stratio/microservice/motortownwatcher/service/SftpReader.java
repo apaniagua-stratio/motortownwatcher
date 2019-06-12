@@ -36,7 +36,7 @@ public class SftpReader {
             //change before deploy (no passphrase)
             //String privateKey = "/home/apaniagua/.ssh/id_rsa";
 
-            System.out.println("AURGI SFTP READING KEY" + sftpkey);
+            System.out.println("MOTORTOWN SFTP READING KEY" + sftpkey);
 
             if (sftpkey.equalsIgnoreCase("/home/apaniagua/.ssh/id_rsa")) {
                 jsch.addIdentity(sftpkey,"mypasswordforlocalkey");
@@ -47,17 +47,17 @@ public class SftpReader {
             }
 
             session.setConfig("StrictHostKeyChecking", "no");
-            System.out.println("AURGI: Establishing Connection..." + user + "@" + host + " with " + sftpkey);
+            System.out.println("MOTORTOWN: Establishing Connection..." + user + "@" + host + " with " + sftpkey);
 
             session.connect();
-            System.out.println("AURGI: Connection established.");
+            System.out.println("MOTORTOWN: Connection established.");
 
-            System.out.println("AURGI: Creating SFTP Channel.");
+            System.out.println("MOTORTOWN: Creating SFTP Channel.");
             ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
             sftpChannel.connect();
 
             InputStream out= null;
-            System.out.println("AURGI: SFTP Getting file " + remoteFile);
+            System.out.println("MOTORTOWN: SFTP Getting file " + remoteFile);
             out= sftpChannel.get(remoteFile);
             BufferedReader br = new BufferedReader(new InputStreamReader(out));
 
@@ -76,7 +76,7 @@ public class SftpReader {
         }
         catch(JSchException | SftpException | IOException e)
         {
-            System.out.println("AURGI: " + e);
+            System.out.println("MOTORTOWN: " + e);
         }
 
         return null;
@@ -162,17 +162,17 @@ public class SftpReader {
             }
 
             session.setConfig("StrictHostKeyChecking", "no");
-            log.info("AURGI: Establishing Connection..." + user + "@" + host + " with " + sftpkey);
+            log.info("MOTORTOWN: Establishing Connection..." + user + "@" + host + " with " + sftpkey);
 
             session.connect();
-            log.info("AURGI: Connection established.");
+            log.info("MOTORTOWN: Connection established.");
 
 
-            log.info("AURGI: Creating SFTP Channel.");
+            log.info("MOTORTOWN: Creating SFTP Channel.");
             ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
             sftpChannel.connect();
 
-            log.info("AURGI: SFTP Reading zip file " + remoteZipFile);
+            log.info("MOTORTOWN: SFTP Reading zip file " + remoteZipFile);
 
             List<InputStream> inputStreams = new ArrayList<>();
             List<String> inputFilenames = new ArrayList<>();
@@ -183,7 +183,7 @@ public class SftpReader {
 
                 while (entry != null) {
 
-                    log.info("AURGI: Zip file contains this: " + entry.getName());
+                    log.info("MOTORTOWN: Zip file contains this: " + entry.getName());
 
                     InputStream in = convertToInputStream(zipInputStream);
 
@@ -203,13 +203,13 @@ public class SftpReader {
             }
 
             sftpChannel.disconnect();
-            log.info("AURGI: SFTP GET CHANNEL DISCONNECT");
+            log.info("MOTORTOWN: SFTP GET CHANNEL DISCONNECT");
 
             //another chanel for puting files
             ChannelSftp sftpPutChannel = (ChannelSftp) session.openChannel("sftp");
             sftpPutChannel.connect();
 
-            log.info("AURGI: SFTP PUT CHANNEL CONNECT");
+            log.info("MOTORTOWN: SFTP PUT CHANNEL CONNECT");
 
 
             for (int i = 0; i < inputFilenames.size(); i++) {
@@ -219,10 +219,10 @@ public class SftpReader {
 
 
             sftpPutChannel.disconnect();
-            log.info("AURGI: SFTP PUT CHANNEL DISCONNECT");
+            log.info("MOTORTOWN: SFTP PUT CHANNEL DISCONNECT");
 
             session.disconnect();
-            log.info("AURGI: SFTP SESSION DISCONNECT");
+            log.info("MOTORTOWN: SFTP SESSION DISCONNECT");
 
 
             return rowsReaded;
@@ -231,7 +231,7 @@ public class SftpReader {
 
         catch(JSchException | IOException | SftpException e)
         {
-            log.error("AURGI: " + e);
+            log.error("MOTORTOWN: " + e);
         }
 
         return null;

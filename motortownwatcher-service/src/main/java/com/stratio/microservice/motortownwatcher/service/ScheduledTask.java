@@ -38,7 +38,8 @@ public class ScheduledTask {
     private int spartaretries;
     @Value("${motortownsync}")
     private String motortownsync;
-
+    @Value("${ecommerce}")
+    private String ECOMMERCE;
 
 
     private static final SimpleDateFormat dateFormat=new SimpleDateFormat("HH:mm:ss");
@@ -53,7 +54,7 @@ public class ScheduledTask {
     public void ingestFromSftp() {
 
 
-        log.info("AURGI: Scheduled job start at: " + dateFormat.format(new Date()));
+        log.info("MOTORTOWN WATCHER v0.9: Scheduled job start at: " + dateFormat.format(new Date()));
 
         SftpReader reader = new SftpReader();
         List<Csvfile> listaZip=reader.listZipFileFromSftp(sftpuser,sftphost,sftpkey,sftpinfolder);
@@ -69,33 +70,33 @@ public class ScheduledTask {
 
                 //save to files readed table
                 csvrepo.save(file);
-                log.info("AURGI FILE: " + file.filename +  "don't exist in DB so will be added. ");
+                log.info(ECOMMERCE + ":" + file.filename +  "don't exist in DB so will be added. ");
 
-                log.info("AURGI FILE: unzippin " + file.filename +  " on folder " + sftpoutfolder);
+                log.info(ECOMMERCE + ": unzipping " + file.filename +  " on folder " + sftpoutfolder);
                 List<CsvRow> rows= new ArrayList<>();
                 rows=reader.unzipFileFromSftp(sftpuser,sftphost,sftpkey,sftpinfolder + file.filename,sftpoutfolder);
                 found = true;
 
-                log.info("AURGI POSTGRES:  start writing to PG this number of entities" + rows.size());
+                log.info(ECOMMERCE +" POSTGRES:  start writing to PG this number of entities" + rows.size());
                 csvrowrepo.deleteAllInBatch();
                 csvrowrepo.flush();
                 csvrowrepo.save(rows);
-                log.info("AURGI POSTGRES:  " + rows.size() +  " csv rows written in PG table. ");
+                log.info(ECOMMERCE + " POSTGRES:  " + rows.size() +  " csv rows written in PG table. ");
 
                 int currentTry=1;
                 String result = "";
                 while (currentTry <= spartaretries && !result.equalsIgnoreCase("Finished")) {
 
-                    log.info("AURGI SPARTA: running " + spartawfname + " v" + spartawfversion + " execution number " + currentTry);
+                    log.info(ECOMMERCE + " SPARTA: running " + spartawfname + " v" + spartawfversion + " execution number " + currentTry);
                     result=runWorkflow(spartawfpath,spartawfname,spartawfversion);
-                    log.info("AURGI SPARTA: " + spartawfname + " v" + spartawfversion + " execution number " + currentTry +  " finished with state " + result);
+                    log.info(ECOMMERCE + " SPARTA: " + spartawfname + " v" + spartawfversion + " execution number " + currentTry +  " finished with state " + result);
                     currentTry++;
                 }
 
-                log.info("AURGI SPARTA: finished with state " + result);
+                log.info(ECOMMERCE + " SPARTA: finished with state " + result);
 
-                log.info("AURGI SYNC: calling motortown microservice");
-                log.info("AURGI SYNC: motortownync " + StratioHttpClient.httpGET(motortownsync));
+                log.info(ECOMMERCE + " SYNC: calling motortown microservice at " + motortownsync);
+                log.info(ECOMMERCE + " SYNC: motortownync " + StratioHttpClient.httpGET(motortownsync));
 
 
                 break;
@@ -103,10 +104,10 @@ public class ScheduledTask {
             }
         }
 
-        if (!found) log.info("AURGI no new files were detected on SFTP. ");
+        if (!found) log.info(ECOMMERCE + ": no new files were detected on SFTP. ");
 
 
-        log.info("AURGI: scheduled job end at: " + dateFormat.format(new Date()));
+        log.info(ECOMMERCE + ": scheduled job end at: " + dateFormat.format(new Date()));
 
     }
 
@@ -124,6 +125,8 @@ public class ScheduledTask {
     private String runWorkflow(String wf_path, String wf_name,int wf_version) {
 
         String sTicket=StratioHttpClient.getDCOSTicket();
+
+        log.info(ECOMMERCE+ ": DCOS ticket: " + sTicket);
 
         String resul=StratioHttpClient.runSpartaWF(sTicket,wf_path,wf_name,wf_version);
 

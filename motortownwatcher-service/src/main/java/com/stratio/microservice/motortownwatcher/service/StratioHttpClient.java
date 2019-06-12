@@ -1,5 +1,6 @@
 package com.stratio.microservice.motortownwatcher.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -13,29 +14,49 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
+@Service
 public class StratioHttpClient {
 
     final static String sRequestAuth = "https://cc.anjana.local/sso/login?service=https%3A%2F%2Fcc.anjana.local%2Fsso%2Foauth2.0%2FcallbackAuthorize";
     final static String FINISHED_STATE = "Finished";
     final static String FAILED_STATE = "Failed";
+
+    public static String REQUEST_AUTH;
+    public static String SPARTA_HOST;
+
+    @Value("${requestauth}")
+    public void setRequestAuth(String requestauth) {
+        REQUEST_AUTH = requestauth;
+    }
+    @Value("${spartahost}")
+    public void setSpartaHost(String spartahost) {
+        SPARTA_HOST = spartahost;
+    }
 
     public static HttpClient getHttpClient() {
 
@@ -68,6 +89,60 @@ public class StratioHttpClient {
                             .setCookieSpec(CookieSpecs.STANDARD).build()).build();
 
             return httpClient;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return HttpClientBuilder.create().build();
+        }
+    }
+
+    public static HttpClient getHttpClientInsecure() {
+
+        try {
+
+            SSLContextBuilder sslctxb = new SSLContextBuilder();
+
+            sslctxb.loadTrustMaterial(KeyStore.getInstance(KeyStore.getDefaultType()),
+                    new TrustSelfSignedStrategy() {
+                        @Override
+                        public boolean isTrusted(X509Certificate[] chain,
+                                                 String            authType)
+                                throws CertificateException {
+                            return true;
+                        }
+                    });
+
+            SSLContext sslctx = sslctxb.build();
+
+            HttpClientBuilder hcb = HttpClients.custom();
+
+            hcb.setSslcontext(sslctx);
+
+            hcb.setHostnameVerifier(new X509HostnameVerifier() {
+                @Override
+                public void verify(String host, SSLSocket ssl)
+                        throws IOException {
+                }
+
+                @Override
+                public void verify(String host, X509Certificate cert)
+                        throws SSLException {
+                }
+
+                @Override
+                public void verify(String host, String[] cns, String[] subjectAlts)
+                        throws SSLException {
+                }
+
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            });
+
+            HttpClient c = hcb.build();
+
+            return c;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -172,7 +247,7 @@ public class StratioHttpClient {
         try {
 
             HttpClient client = StratioHttpClient.getHttpClient();
-            HttpGet request = new HttpGet(sRequestAuth);
+            HttpGet request = new HttpGet(REQUEST_AUTH);
             HttpResponse response = null;
             response = client.execute(request);
 
@@ -192,7 +267,7 @@ public class StratioHttpClient {
 
             // --------------------- POST -----------------------------
 
-            HttpPost post = new HttpPost(sRequestAuth);
+            HttpPost post = new HttpPost(REQUEST_AUTH);
 
 
             post.addHeader("Cookie", sCookie);
@@ -229,7 +304,7 @@ public class StratioHttpClient {
         try {
 
             URIBuilder builder = new URIBuilder();
-            builder.setScheme("https").setHost("sparta.anjana.local/sparta-server").setPath("/login")
+            builder.setScheme("https").setHost(SPARTA_HOST).setPath("/login")
                     .setParameter("code", sTicket);
 
 
@@ -245,7 +320,9 @@ public class StratioHttpClient {
             sUser = StringUtils.substringAfter(sUser, "=");
 
             // get wrokfow id
-            HttpPost post = new HttpPost("https://sparta.anjana.local/sparta-server/workflows/find");
+            HttpClient apiClient= StratioHttpClient.getHttpClientInsecure();
+
+            HttpPost post = new HttpPost("https://" + SPARTA_HOST + "/workflows/find");
 
             post.setHeader("Cookie", "user=" + sUser);
             post.setHeader("Accept", "application/json");
@@ -257,7 +334,7 @@ public class StratioHttpClient {
             //post.setEntity(new UrlEncodedFormEntity(urlParameters));
             post.setEntity(new StringEntity(body));
 
-            HttpResponse apiresponse = loginClient.execute(post);
+            HttpResponse apiresponse = apiClient.execute(post);
 
             String apiResult = EntityUtils.toString(apiresponse.getEntity());
 
@@ -266,35 +343,35 @@ public class StratioHttpClient {
 
             // run workflow id
 
-            HttpPost runpost = new HttpPost(String.format("https://sparta.anjana.local/sparta-server/workflows/run/%s", sId));
+            HttpPost runpost = new HttpPost(String.format("https://" + SPARTA_HOST + "/workflows/run/%s", sId));
 
             runpost.setHeader("Cookie", "user=" + sUser);
             runpost.setHeader("Accept", "application/json");
             runpost.setHeader("Content-type", "application/json");
 
-            HttpResponse runresponse = loginClient.execute(runpost);
+            HttpResponse runresponse = apiClient.execute(runpost);
 
             String runResult = EntityUtils.toString(runresponse.getEntity());
             String sExecutionId = StringUtils.substringAfter(runResult, "\"");
             sExecutionId = StringUtils.substringBefore(sExecutionId, "\"");
 
             //TODO: wait until completion, retry 3 times
-            HttpGet execpost = new HttpGet(String.format("https://sparta.anjana.local/sparta-server/workflowExecutions/%s", sExecutionId));
+            HttpGet execpost = new HttpGet(String.format("https://" + SPARTA_HOST + "/workflowExecutions/%s", sExecutionId));
 
             execpost.setHeader("Cookie", "user=" + sUser);
             execpost.setHeader("Accept", "application/json");
             execpost.setHeader("Content-type", "application/json");
 
-            HttpResponse execresponse = loginClient.execute(execpost);
+            HttpResponse execresponse = apiClient.execute(execpost);
             String execResult = EntityUtils.toString(execresponse.getEntity());
 
             String lastState = parseWfState(execResult);
 
             //wait for completion
             while (!lastState.equalsIgnoreCase(FINISHED_STATE) && !lastState.equalsIgnoreCase(FAILED_STATE)) {
-                Thread.sleep(10000);
+                Thread.sleep(5000);
 
-                HttpResponse execresponse2 = loginClient.execute(execpost);
+                HttpResponse execresponse2 = apiClient.execute(execpost);
                 execResult = EntityUtils.toString(execresponse2.getEntity());
                 lastState = parseWfState(execResult);
 
@@ -323,7 +400,7 @@ public class StratioHttpClient {
         try {
 
             URIBuilder builder = new URIBuilder();
-            builder.setScheme("https").setHost("sparta.anjana.local/sparta-server").setPath("/login")
+            builder.setScheme("https").setHost(SPARTA_HOST).setPath("/login")
                     .setParameter("code", sTicket);
 
 
@@ -340,7 +417,7 @@ public class StratioHttpClient {
 
 
             // get workflow id
-            HttpPost post = new HttpPost("https://sparta.anjana.local/sparta-server/workflows/find");
+            HttpPost post = new HttpPost("https://" + SPARTA_HOST + "/workflows/find");
 
             post.setHeader("Cookie", "user=" + sUser);
             post.setHeader("Accept", "application/json");

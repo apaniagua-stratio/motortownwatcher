@@ -21,12 +21,20 @@ spring:
     username: motortown_sync
     password:
 
+spring.jpa.properties.hibernate.jdbc.batch_size : 50
+spring.jpa.properties.hibernate.order_inserts : true
+
+ecommerce: MOTORTOWN
 sftphost: 10.20.1.112
 sftpuser: motortown_watcher
 sftpkey: /data/stratio/motortownwatcher.key
 sftpinfolder: /anjana/motortown_pro/ingesta_productos_stock/pendiente/
 sftpoutfolder: /anjana/motortown_pro/ingesta_productos_stock/en_proceso/
-schedulerRate: 600000
-
-spring.jpa.properties.hibernate.jdbc.batch_size : 50
-spring.jpa.properties.hibernate.order_inserts : true
+schedulerRate: 1800000
+spartawfpath: /motortown
+spartawfname: motortown-recalculo
+spartawfversion: 20
+spartaretries: 3
+spartahost: sparta.anjana.local/sparta-server
+requestauth: https://cc.anjana.local/sso/login?service=https%3A%2F%2Fcc.anjana.local%2Fsso%2Foauth2.0%2FcallbackAuthorize
+motortownsync: http://10.20.1.65:10078/productscsvfile
