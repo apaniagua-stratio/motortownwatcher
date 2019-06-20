@@ -14,6 +14,8 @@ logging:
     org.apache: WARN
     org.eclipse: WARN
     com.netflix: INFO
+    com.stratio: INFO
+
 
 spring:
   datasource:

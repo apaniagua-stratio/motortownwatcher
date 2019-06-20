@@ -72,6 +72,7 @@ public class ScheduledTask {
                 csvrepo.save(file);
                 log.info(ECOMMERCE + ":" + file.filename +  "don't exist in DB so will be added. ");
 
+                /*
                 log.info(ECOMMERCE + ": unzipping " + file.filename +  " on folder " + sftpoutfolder);
                 List<CsvRow> rows= new ArrayList<>();
                 rows=reader.unzipFileFromSftp(sftpuser,sftphost,sftpkey,sftpinfolder + file.filename,sftpoutfolder);
@@ -87,7 +88,7 @@ public class ScheduledTask {
                 String result = "";
                 while (currentTry <= spartaretries && !result.equalsIgnoreCase("Finished")) {
 
-                    log.info(ECOMMERCE + " SPARTA: running " + spartawfname + " v" + spartawfversion + " execution number " + currentTry);
+                    log.info(ECOMMERCE + " SPARTA: running " + spartawfname  + " v" + spartawfversion + " execution number " + currentTry);
                     result=runWorkflow(spartawfpath,spartawfname,spartawfversion);
                     log.info(ECOMMERCE + " SPARTA: " + spartawfname + " v" + spartawfversion + " execution number " + currentTry +  " finished with state " + result);
                     currentTry++;
@@ -97,6 +98,20 @@ public class ScheduledTask {
 
                 log.info(ECOMMERCE + " SYNC: calling motortown microservice at " + motortownsync);
                 log.info(ECOMMERCE + " SYNC: motortownync " + StratioHttpClient.httpGET(motortownsync));
+
+                */
+
+
+
+
+                String body = String.format("{\"sftpFile\":\"%s\"}", sftpinfolder + file.filename);
+                log.info(ECOMMERCE + " SYNC: calling motortown microservice at " + motortownsync + " with body " + body);
+                //System.out.println("BODY: " + sftpinfolder + file.filename);
+                log.info(ECOMMERCE + " SYNC: " + StratioHttpClient.httpPOST(motortownsync,body));
+
+                file.status="Processed";
+                csvrepo.save(file);
+
 
 
                 break;
@@ -124,13 +139,16 @@ public class ScheduledTask {
 
     private String runWorkflow(String wf_path, String wf_name,int wf_version) {
 
-        String sTicket=StratioHttpClient.getDCOSTicket();
 
-        log.info(ECOMMERCE+ ": DCOS ticket: " + sTicket);
+            String sTicket=StratioHttpClient.getDCOSTicket();
 
-        String resul=StratioHttpClient.runSpartaWF(sTicket,wf_path,wf_name,wf_version);
+            log.info(ECOMMERCE+ ": DCOS ticket: " + sTicket);
 
-        return resul;
+            String resul=StratioHttpClient.runSpartaWF(sTicket,wf_path,wf_name,wf_version);
+
+            return resul;
+
+
     }
 
 }

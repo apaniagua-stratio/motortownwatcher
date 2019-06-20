@@ -1,30 +1,32 @@
 package com.stratio.microservice.motortownwatcher.service;
 
-import com.stratio.microservice.motortownwatcher.repository.CsvfileRepository;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public class ServiceImplTest {
 
-    private CsvfileRepository csvrepo;
-    private ServiceImpl serv;
+
+    @Mock
+    private ServiceImpl service;
 
     @Before
-    public void setUp()
-    {
-        ServiceImpl serv = new ServiceImpl();
+    public void init() {
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void fileListNotEmpty() {
-
-        //assertThat(serv.listFilesInSftp("/anjana").size() > 0);
-        assertThat(true);
+    public void testService() {
+        int i = service.getConfig().size();
+        assertEquals(i,0);
 
     }
+
+
 }

@@ -120,7 +120,7 @@ public class SftpReader {
                         "EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
                 try {
                     Date fecha = dateFormat.parse( entry.getAttrs().getMtimeString());
-                    files.add(new Csvfile(entry.getFilename(),fecha.toLocaleString()));
+                    files.add(new Csvfile(entry.getFilename(),fecha.toLocaleString(),"In progress"));
 
                 } catch (ParseException e) {
                     log.info("AURGI: " + e);

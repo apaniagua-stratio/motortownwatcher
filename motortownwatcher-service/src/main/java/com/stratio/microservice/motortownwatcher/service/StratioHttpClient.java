@@ -451,8 +451,8 @@ public class StratioHttpClient {
         try {
 
             HttpGet httpget = new HttpGet(URL);
-            HttpClient loginClient = StratioHttpClient.getHttpClient();
-            HttpResponse response = loginClient.execute(httpget);
+            HttpClient client = StratioHttpClient.getHttpClient();
+            HttpResponse response = client.execute(httpget);
             return EntityUtils.toString(response.getEntity());
         }
         catch(IOException  e)
@@ -462,7 +462,37 @@ public class StratioHttpClient {
 
         return"";
 
-}
+    }
+
+    public static String httpPOST(String URL,String body) {
+
+        try {
+
+            //HttpPost httppost = new HttpPost(URL);
+            //httppost.setEntity(new StringEntity(body));
+
+            HttpClient client = StratioHttpClient.getHttpClient();
+            //HttpResponse response = client.execute(httppost);
+
+
+            HttpPost request = new HttpPost(URL);
+            StringEntity params =new StringEntity(body);
+            request.addHeader("content-type", "application/json");
+            request.setEntity(params);
+            HttpResponse response = client.execute(request);
+
+
+            return EntityUtils.toString(response.getEntity());
+
+        }
+        catch(IOException  e)
+        {
+            e.printStackTrace();
+        }
+
+        return"";
+
+    }
 
 
 }

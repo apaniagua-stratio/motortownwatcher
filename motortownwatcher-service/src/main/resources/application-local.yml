@@ -44,7 +44,7 @@ spartawfversion: 20
 spartaretries: 3
 spartahost: sparta.anjana.local/sparta-server
 requestauth: https://cc.anjana.local/sso/login?service=https%3A%2F%2Fcc.anjana.local%2Fsso%2Foauth2.0%2FcallbackAuthorize
-motortownsync: http://10.20.1.65:10078/productscsvfile
+motortownsync: http://10.20.1.65:10078/reprocess
 
 server:
   port: 8888
