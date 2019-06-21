@@ -107,7 +107,7 @@ public class ScheduledTask {
                 String body = String.format("{\"sftpFile\":\"%s\"}", sftpinfolder + file.filename);
                 log.info(ECOMMERCE + " SYNC: calling motortown microservice at " + motortownsync + " with body " + body);
                 //System.out.println("BODY: " + sftpinfolder + file.filename);
-                log.info(ECOMMERCE + " SYNC: " + StratioHttpClient.httpPOST(motortownsync,body));
+                log.info(ECOMMERCE + " SYNC: response: " + StratioHttpClient.httpPOST(motortownsync,body));
 
                 file.status="Processed";
                 csvrepo.save(file);
