@@ -42,6 +42,8 @@ public class ScheduledTask {
     private String ECOMMERCE;
 
 
+    final static String FINISHED_STATE = "Finished";
+    final static String FAILED_STATE = "Failed";
     private static final SimpleDateFormat dateFormat=new SimpleDateFormat("HH:mm:ss");
 
     @Autowired
@@ -53,8 +55,7 @@ public class ScheduledTask {
     @Scheduled(fixedRateString = "${schedulerRate}")
     public void ingestFromSftp() {
 
-
-        log.info("MOTORTOWN WATCHER v0.9: Scheduled job start at: " + dateFormat.format(new Date()));
+        log.info("MOTORTOWN WATCHER DEV: Scheduled job start at: " + dateFormat.format(new Date()));
 
         SftpReader reader = new SftpReader();
         List<Csvfile> listaZip=reader.listZipFileFromSftp(sftpuser,sftphost,sftpkey,sftpinfolder);
@@ -66,11 +67,11 @@ public class ScheduledTask {
             Csvfile file=csvIterator.next();
 
             //if file dont exist in repo, add it (and launch workflow)
-            if (csvrepo.findByFileid(file.filename + "&" + file.filedate).size() <= 0) {
+            if (csvrepo.findByFileid(file.filename + "&" + file.filedate).size() <= 0 || csvrepo.findByFileidAndStatus(file.filename + "&" + file.filedate,FAILED_STATE).size()>0) {
 
                 //save to files readed table
                 csvrepo.save(file);
-                log.info(ECOMMERCE + ":" + file.filename +  "don't exist in DB so will be added. ");
+                log.info(ECOMMERCE + ":" + file.filename +  " don't exist in DB so will be added. ");
 
                 /*
                 log.info(ECOMMERCE + ": unzipping " + file.filename +  " on folder " + sftpoutfolder);
@@ -107,12 +108,18 @@ public class ScheduledTask {
                 String body = String.format("{\"sftpFile\":\"%s\"}", sftpinfolder + file.filename);
                 log.info(ECOMMERCE + " SYNC: calling motortown microservice at " + motortownsync + " with body " + body);
                 //System.out.println("BODY: " + sftpinfolder + file.filename);
-                log.info(ECOMMERCE + " SYNC: response: " + StratioHttpClient.httpPOST(motortownsync,body));
+                String response = StratioHttpClient.httpPOST(motortownsync,body);
+                log.info(ECOMMERCE + " SYNC: response: " + response);
 
-                file.status="Processed";
+                //corregir esto lo q hay q identificar es el finisehd, por si llega un 500 tmb poner failed
+                if (response.contains(FINISHED_STATE)) {
+                    file.status=FINISHED_STATE;
+                }
+                else {
+                    file.status=FAILED_STATE;
+                }
+
                 csvrepo.save(file);
-
-
 
                 break;
 

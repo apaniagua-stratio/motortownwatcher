@@ -13,5 +13,7 @@ public interface CsvfileRepository extends CrudRepository<Csvfile, String> {
 
     List<Csvfile> findByFileid(String fileid);
 
+    List<Csvfile> findByFileidAndStatus(String fileid,String Status);
+
 
 }
