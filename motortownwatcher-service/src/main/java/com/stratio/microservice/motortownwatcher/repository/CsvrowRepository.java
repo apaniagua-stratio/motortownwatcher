@@ -30,23 +30,10 @@ public class CsvrowRepository extends SimpleJpaRepository<CsvRow, Long> {
         int batchSize = 25;
         long result=0;
 
-        //EntityManager entityManager = entityManagerFactory().createEntityManager();
-
-        //EntityTransaction entityTransaction = entityManager.getTransaction();
-
         try {
             //entityTransaction.begin();
 
             for (int i = 0; i < rows.size(); i++) {
-               // if (i > 0 && i % batchSize == 0) {
-                    //entityTransaction.commit();
-                    //entityTransaction.begin();
-
-                    //entityManager.clear();
-                    //entityManager.flush();
-                //}
-
-                //Post post = new Post(String.format("Post %d", i + 1));
 
                 entityManager.persist(rows.get(i));
                 result++;
@@ -54,13 +41,8 @@ public class CsvrowRepository extends SimpleJpaRepository<CsvRow, Long> {
             }
 
             return result;
-            //entityTransaction.commit();
+
         } catch (RuntimeException e) {
-            /*
-            if (entityTransaction.isActive()) {
-                entityTransaction.rollback();
-            }
-            */
 
             throw e;
         } finally {

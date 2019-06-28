@@ -73,38 +73,6 @@ public class ScheduledTask {
                 csvrepo.save(file);
                 log.info(ECOMMERCE + ":" + file.filename +  " don't exist in DB so will be added. ");
 
-                /*
-                log.info(ECOMMERCE + ": unzipping " + file.filename +  " on folder " + sftpoutfolder);
-                List<CsvRow> rows= new ArrayList<>();
-                rows=reader.unzipFileFromSftp(sftpuser,sftphost,sftpkey,sftpinfolder + file.filename,sftpoutfolder);
-                found = true;
-
-                log.info(ECOMMERCE +" POSTGRES:  start writing to PG this number of entities" + rows.size());
-                csvrowrepo.deleteAllInBatch();
-                csvrowrepo.flush();
-                csvrowrepo.save(rows);
-                log.info(ECOMMERCE + " POSTGRES:  " + rows.size() +  " csv rows written in PG table. ");
-
-                int currentTry=1;
-                String result = "";
-                while (currentTry <= spartaretries && !result.equalsIgnoreCase("Finished")) {
-
-                    log.info(ECOMMERCE + " SPARTA: running " + spartawfname  + " v" + spartawfversion + " execution number " + currentTry);
-                    result=runWorkflow(spartawfpath,spartawfname,spartawfversion);
-                    log.info(ECOMMERCE + " SPARTA: " + spartawfname + " v" + spartawfversion + " execution number " + currentTry +  " finished with state " + result);
-                    currentTry++;
-                }
-
-                log.info(ECOMMERCE + " SPARTA: finished with state " + result);
-
-                log.info(ECOMMERCE + " SYNC: calling motortown microservice at " + motortownsync);
-                log.info(ECOMMERCE + " SYNC: motortownync " + StratioHttpClient.httpGET(motortownsync));
-
-                */
-
-
-
-
                 String body = String.format("{\"sftpFile\":\"%s\"}", sftpinfolder + file.filename);
                 log.info(ECOMMERCE + " SYNC: calling motortown microservice at " + motortownsync + " with body " + body);
                 //System.out.println("BODY: " + sftpinfolder + file.filename);

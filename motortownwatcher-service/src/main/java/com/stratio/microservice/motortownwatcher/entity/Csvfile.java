@@ -7,7 +7,7 @@ import javax.persistence.Table;
 
 @Data
 @Entity
-@Table(name = "aurgifiles", schema = "motortown")
+@Table(name = "files", schema = "motortown")
 
 public class Csvfile {
 
