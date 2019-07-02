@@ -35,7 +35,7 @@ sftpoutfolder: /anjana/motortown_pro/ingesta_productos_stock/en_proceso/
 schedulerRate: 1800000
 spartawfpath: /motortown
 spartawfname: motortown-recalculo
-spartawfversion: 24
+spartawfversion: 25
 spartaretries: 3
 spartahost: sparta.anjana.local/sparta-server
 requestauth: https://cc.anjana.local/sso/login?service=https%3A%2F%2Fcc.anjana.local%2Fsso%2Foauth2.0%2FcallbackAuthorize

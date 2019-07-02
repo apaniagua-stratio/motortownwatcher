@@ -1,6 +1,6 @@
 package com.stratio.microservice.motortownwatcher.service;
 
-import com.stratio.microservice.motortownwatcher.entity.Csvfile;
+
 import com.stratio.microservice.motortownwatcher.repository.CsvfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

@@ -94,7 +94,7 @@ public class SftpReader {
             Session session = jsch.getSession(user, host, port);
 
             if (sftpkey.equalsIgnoreCase("/home/apaniagua/.ssh/id_rsa")) {
-                jsch.addIdentity(sftpkey,"MailSagApm17");
+                jsch.addIdentity(sftpkey,"LOCAL_PASSWORD");
             }
             else {
                 jsch.addIdentity(sftpkey);
@@ -155,7 +155,7 @@ public class SftpReader {
 
 
             if (sftpkey.equalsIgnoreCase("/home/apaniagua/.ssh/id_rsa")) {
-                jsch.addIdentity(sftpkey,"MailSagApm17");
+                jsch.addIdentity(sftpkey,"LOCAL_PASSWORD");
             }
             else {
                 jsch.addIdentity(sftpkey);

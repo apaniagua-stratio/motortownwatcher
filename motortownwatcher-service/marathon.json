@@ -10,27 +10,34 @@
     "AS_MIN_INSTANCES": "1",
     "SPRING_DATASOURCE_USERNAME": "motortown_sync",
     "CONFIG_SERVER_URI": "",
-    "SCHEDULERRATE": "1800000",
+    "SCHEDULERRATE": "15500000",
     "AS_COOL_DOWN_FACTOR": "3",
     "AS_MICROSERVICE": "true",
     "AS_MIN_MEM_PERCENT": "60",
     "AS_MAX_INSTANCES": "1",
+    "MOTORTOWNSYNC": "http://motortownsync.motortown.marathon.mesos:8080/reprocess",
     "SFTPUSER": "motortown_watcher",
     "AS_MAX_CPU_TIME": "80",
     "SFTPKEY": "/data/stratio/motortownwatcher.key",
     "AS_METRICS_PORT_NAME": "metrics",
+    "SPARTARETRIES": "3",
     "AS_MAX_MEM_PERCENT": "85",
+    "SPARTAHOST": "sparta.anjana.local/sparta-server",
     "AS_MIN_CPU_TIME": "60",
-    "SFTPINFOLDER": "/anjana/motortown_pro/ingesta_productos_stock/pendiente/",
+    "SFTPINFOLDER": "/uploads/ingesta_productos_stock/pendiente/",
     "AS_AUTOSCALE_MULTIPLIER": "1.5",
     "SPRING_DATASOURCE_PASSWORD": "",
     "SPRING_CLOUD_CONFIG_ENABLED": "false",
-    "SFTPOUTFOLDER": "/anjana/motortown_pro/ingesta_productos_stock/en_proceso/",
+    "SFTPOUTFOLDER": "/uploads/ingesta_productos_stock/en_proceso/",
+    "SPARTAWFPATH": "/motortown",
     "SFTPHOST": "10.20.1.112",
     "AS_TRIGGER_NUMBER": "2",
+    "SPARTAWFNAME": "motortown-recalculo",
     "CONFIG_SERVER_NAME": "config-server",
     "VAULT_PORT": "8200",
+    "REQUESTAUTH": "https://cc.anjana.local/sso/login?service=https%3A%2F%2Fcc.anjana.local%2Fsso%2Foauth2.0%2FcallbackAuthorize",
     "SPRING_DATASOURCE_URL": "jdbc:postgresql://poolpostgrestls.marathon.mesos:5432/postgres?user=motortown_sync&prepareThreshold=0&ssl=true&sslmode=verify-ca&sslcert=/data/stratio/motortown_sync.pem&sslrootcert=/data/stratio/ca-bundle.pem&sslkey=/data/stratio/motortown_sync.key.pk8&loginTimeout=60",
+    "SPARTAWFVERSION": "25",
     "spring_profiles_active": "dev,info,default",
     "DEPLOYMENT_ENV": "dev",
     "APPROLE": {
@@ -51,7 +58,7 @@
   "maxLaunchDelaySeconds": 3600,
   "container": {
     "docker": {
-      "image": "registry.anjana.local:5001/motortownwatcher:1.0.0-SNAPSHOT-1",
+      "image": "registry.anjana.local:5001/motortownwatcher:1.0.0-SNAPSHOT-2",
       "forcePullImage": true,
       "privileged": false,
       "parameters": [
@@ -73,7 +80,7 @@
           "name": "metrics",
           "servicePort": 10125,
           "labels": {
-            "VIP_1": "/motortown/motortownwatcher:8091"
+            "metrics_path": "/prometheus"
           }
         }
       ],
@@ -107,10 +114,7 @@
     "maximumOverCapacity": 1
   },
   "labels": {
-    "PROMETHEUS_JOB": "motortown.motortownwatcher",
-    "HAPROXY_GROUP": "external",
-    "HAPROXY_0_PORT": "10077",
-    "HAPROXY_0_VHOST": "marathon-lb.marathon.mesos"
+    "PROMETHEUS_JOB": "motortown.motortownwatcher"
   },
   "acceptedResourceRoles": null,
   "ipAddress": {

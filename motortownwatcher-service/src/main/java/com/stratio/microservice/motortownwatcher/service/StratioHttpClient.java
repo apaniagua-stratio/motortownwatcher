@@ -234,8 +234,9 @@ public class StratioHttpClient {
 
     public static String getDCOSTicket() {
 
-        final String spartaUser = "fjurado";
-        final String spartaPassEncrypted = "%3C%28%7Dx7wE%28U%27DZ%3Etv%3D";
+        final String spartaUser = "SPARTA_USER";
+        final String spartaPass = "SPARTA_PASSWORD";
+
 
         String sCookie = "";
         String sLT = "";
@@ -278,7 +279,7 @@ public class StratioHttpClient {
             urlParameters.add(new BasicNameValuePair("_eventId", "submit"));
             urlParameters.add(new BasicNameValuePair("tenant", "NONE"));
             urlParameters.add(new BasicNameValuePair("username", spartaUser));
-            urlParameters.add(new BasicNameValuePair("password", "<(}x7wE(U'DZ>tv="));
+            urlParameters.add(new BasicNameValuePair("password", spartaPass));
 
             post.setEntity(new UrlEncodedFormEntity(urlParameters));
 
@@ -468,8 +469,6 @@ public class StratioHttpClient {
 
         try {
 
-            //HttpPost httppost = new HttpPost(URL);
-            //httppost.setEntity(new StringEntity(body));
 
             HttpClient client = StratioHttpClient.getHttpClient();
             //HttpResponse response = client.execute(httppost);
