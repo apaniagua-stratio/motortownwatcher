@@ -17,6 +17,10 @@ public class CsvrowRepository extends SimpleJpaRepository<CsvRow, Long> {
         this.entityManager=entityManager;
     }
 
+    public List<CsvRow> findByEntity(String entity) {
+        return this.findAll();
+    }
+
     @Transactional
     public List<CsvRow> save(List<CsvRow> rows) {
         rows.forEach(row -> entityManager.persist(row));

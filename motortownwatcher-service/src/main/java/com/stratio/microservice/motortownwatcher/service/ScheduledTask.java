@@ -2,8 +2,11 @@ package com.stratio.microservice.motortownwatcher.service;
 
 import com.stratio.microservice.motortownwatcher.entity.CsvRow;
 import com.stratio.microservice.motortownwatcher.entity.Csvfile;
+import com.stratio.microservice.motortownwatcher.entity.Stock;
 import com.stratio.microservice.motortownwatcher.repository.CsvfileRepository;
 import com.stratio.microservice.motortownwatcher.repository.CsvrowRepository;
+import com.stratio.microservice.motortownwatcher.repository.ProductRepository;
+import com.stratio.microservice.motortownwatcher.repository.StockRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,12 +53,20 @@ public class ScheduledTask {
     private CsvfileRepository csvrepo;
 
     @Autowired
+    private StockRepository stockrepo;
+
+    @Autowired
+    private ProductRepository prodrepo;
+
+    @Autowired
     private CsvrowRepository csvrowrepo;
 
     @Scheduled(fixedRateString = "${schedulerRate}")
     public void ingestFromSftp() {
 
         log.info("MOTORTOWN WATCHER DEV: Scheduled job start at: " + dateFormat.format(new Date()));
+
+        /*
 
         SftpReader reader = new SftpReader();
         List<Csvfile> listaZip=reader.listZipFileFromSftp(sftpuser,sftphost,sftpkey,sftpinfolder);
@@ -97,10 +108,57 @@ public class ScheduledTask {
         if (!found) log.info(ECOMMERCE + ": no new files were detected on SFTP. ");
 
 
+
+         */
+
+
+
+        //MailSender mailSender=new MailSender();
+
+
         log.info(ECOMMERCE + ": scheduled job end at: " + dateFormat.format(new Date()));
 
     }
 
+    private String getMailContent()
+    {
+        //TODO send mail with rows ingested
+
+        int csvproductCount=0;
+        int csvplataformaCount=0;
+        int csvtoprecambiosCount=0;
+        int csvstockCount=0;
+
+        List<CsvRow> rows = csvrowrepo.findAll();
+
+        for (CsvRow r: rows) {
+
+            if (r.entity.equalsIgnoreCase("motortown_productos_y_servicios.csv")) csvproductCount++;
+            if (r.entity.equalsIgnoreCase("motortown_stock_en_plataforma.csv")) csvplataformaCount++;
+            if (r.entity.equalsIgnoreCase("motortown_stock_por_centro.csv")) csvstockCount++;
+            if (r.entity.equalsIgnoreCase("pricat_ctop5.csv")) csvtoprecambiosCount++;
+
+        }
+
+        long stockCount=stockrepo.count();
+        int plataformaCount= stockrepo.findByIdnavision("20").size();
+        int toprecambiosCount= stockrepo.findByIdnavision("100001").size();
+        long productCount= prodrepo.count();
+        stockCount= stockCount - plataformaCount - toprecambiosCount;
+
+        String mailContent="";
+        mailContent += " Csv productos:" + csvproductCount;
+        mailContent += " Csv stock:" + csvstockCount;
+        mailContent += " Csv plataforma:" + csvplataformaCount;
+        mailContent += " Csv toprecambios:" + csvtoprecambiosCount;
+
+        mailContent += " Productos OK:" + productCount;
+        mailContent += " Stock plataforma OK:" + plataformaCount;
+        mailContent += " Stock toprecambios OK:" + toprecambiosCount;
+        mailContent += " Stock centros OK:" + stockCount;
+
+        return mailContent;
+    }
 
     private String getSpartaVersion() {
 
