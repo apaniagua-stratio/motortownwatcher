@@ -65,8 +65,7 @@ public class ScheduledTask {
     public void ingestFromSftp() {
 
         log.info("MOTORTOWN WATCHER DEV: Scheduled job start at: " + dateFormat.format(new Date()));
-
-        /*
+        
 
         SftpReader reader = new SftpReader();
         List<Csvfile> listaZip=reader.listZipFileFromSftp(sftpuser,sftphost,sftpkey,sftpinfolder);
@@ -106,11 +105,6 @@ public class ScheduledTask {
         }
 
         if (!found) log.info(ECOMMERCE + ": no new files were detected on SFTP. ");
-
-
-
-         */
-
 
 
         //MailSender mailSender=new MailSender();
