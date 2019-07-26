@@ -28,8 +28,31 @@ spring:
     username: fjurado
     password:
 
+  mail:
+    host: smtp.gmail.com
+    username: tiendaonline@motortown.es
+    password: MTAnjana.1234
+    port: 587
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+          auth: true
+          starttls:
+            enable: true
+
+
+
+
 spring.jpa.properties.hibernate.jdbc.batch_size : 50
 spring.jpa.properties.hibernate.order_inserts : true
+spring.jpa.properties.hibernate.dialect : org.hibernate.dialect.PostgreSQL95Dialect
+spring.jpa.hibernate.naming.implicit-strategy : org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+spring.jpa.hibernate.naming.physical-strategy : org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+spring.jpa.properties.hibernate.globally_quoted_identifiers : true
 
 ecommerce: MOTORTOWN
 sftphost: 10.20.1.112
@@ -37,14 +60,16 @@ sftpuser: motortown_watcher
 sftpkey: /home/apaniagua/.ssh/id_rsa
 sftpinfolder: /anjana/motortown_pro/ingesta_productos_stock/pendiente/
 sftpoutfolder: /anjana/motortown_pro/ingesta_productos_stock/en_proceso/
-schedulerRate: 1800000
+schedulerRate: 900000
+schedulerCron: 0 33 14 * * *
 spartawfpath: /motortown
 spartawfname: motortown-recalculo
-spartawfversion: 25
+spartawfversion: 28
 spartaretries: 3
 spartahost: sparta.anjana.local/sparta-server
 requestauth: https://cc.anjana.local/sso/login?service=https%3A%2F%2Fcc.anjana.local%2Fsso%2Foauth2.0%2FcallbackAuthorize
 motortownsync: http://10.20.1.65:10078/reprocess
+adminmail: apaniagua@stratio.com
 
 server:
   port: 8888

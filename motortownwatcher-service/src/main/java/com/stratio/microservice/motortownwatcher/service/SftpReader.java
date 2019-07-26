@@ -138,7 +138,7 @@ public class SftpReader {
             log.error("AURGI: " + e);
         }
 
-        return null;
+        return new ArrayList<Csvfile>();
 
     }
 
