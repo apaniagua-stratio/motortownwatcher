@@ -49,6 +49,7 @@ public class StratioHttpClient {
     public static String REQUEST_AUTH;
     public static String SPARTA_HOST;
 
+    /*
     @Value("${requestauth}")
     public void setRequestAuth(String requestauth) {
         REQUEST_AUTH = requestauth;
@@ -57,6 +58,8 @@ public class StratioHttpClient {
     public void setSpartaHost(String spartahost) {
         SPARTA_HOST = spartahost;
     }
+
+     */
 
     public static HttpClient getHttpClient() {
 
@@ -150,6 +153,7 @@ public class StratioHttpClient {
         }
     }
 
+    /*
     public static String getSpartaInfo(String sTicket) {
 
         try {
@@ -446,6 +450,8 @@ public class StratioHttpClient {
 
     }
 
+
+     */
 
     public static String httpGET(String URL) {
 

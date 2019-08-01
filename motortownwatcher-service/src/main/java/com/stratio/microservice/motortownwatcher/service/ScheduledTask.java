@@ -32,20 +32,16 @@ public class ScheduledTask {
     private String sftpinfolder;
     @Value("${sftpoutfolder}")
     private String sftpoutfolder;
-    @Value("${spartawfpath}")
-    private String spartawfpath;
-    @Value("${spartawfname}")
-    private String spartawfname;
-    @Value("${spartawfversion}")
-    private int spartawfversion;
-    @Value("${spartaretries}")
-    private int spartaretries;
     @Value("${motortownsync}")
     private String motortownsync;
     @Value("${ecommerce}")
     private String ECOMMERCE;
-    @Value("${adminmail}")
-    private String adminmail;
+    @Value("${sendermail}")
+    private String sendermail;
+    @Value("${receivermail}")
+    private String receivermail;
+    @Value("${subjectmail}")
+    private String subjectmail;
 
 
     final static String FINISHED_STATE = "Finished";
@@ -70,12 +66,11 @@ public class ScheduledTask {
     @Autowired
     private MailClient mailClient;
 
-    @Scheduled(fixedRateString = "${schedulerRate}")
-    //TMP PRUEBAS @Scheduled(cron = "${schedulerCron}")
+    //@Scheduled(fixedRateString = "${schedulerRate}")
+    @Scheduled(cron = "${schedulerCron}")
     public void ingestFromSftp() {
 
         log.info("MOTORTOWN WATCHER DEV: Scheduled job start at: " + dateFormat.format(new Date()));
-
 
         SftpReader reader = new SftpReader();
         List<Csvfile> listaZip=reader.listZipFileFromSftp(sftpuser,sftphost,sftpkey,sftpinfolder);
@@ -111,6 +106,10 @@ public class ScheduledTask {
 
                 csvrepo.save(file);
 
+                //envio de mail resultados
+                String content= getMailContent();
+                mailClient.prepareAndSend(sendermail,receivermail,subjectmail,content);
+
                 break;
 
             }
@@ -118,10 +117,6 @@ public class ScheduledTask {
 
         if (!found) log.info(ECOMMERCE + ": no new files were detected on SFTP. ");
 
-        String content= getMailContent();
-        mailClient.prepareAndSend(adminmail,content);
-
-        System.out.println(content);
 
         log.info(ECOMMERCE + ": scheduled job end at: " + dateFormat.format(new Date()));
 
@@ -150,61 +145,33 @@ public class ScheduledTask {
         //long stockCount=stockrepo.count();
         //int plataformaCount= stockrepo.findByIdnavision("20").size();
         //int toprecambiosCount= stockrepo.findByIdnavision("100001").size();
-        long productCount= prodrepo.count();
+        long productCount= prodrepo.findLastProductsOk().size();
         //stockCount= stockCount - plataformaCount - toprecambiosCount;
 
         String mailContent="";
-        mailContent += " Productos en csv original:" + csvproductCount + System.lineSeparator();
-        //mailContent += " Stock en csv original:" + csvstockCount;
-        //mailContent += " Plataforma en csv original:" + csvplataformaCount;
-        //mailContent += " Toprecambios en csv original:" + csvtoprecambiosCount;
+        mailContent += System.lineSeparator() + "Productos en csv: " + csvproductCount + System.lineSeparator() + System.lineSeparator();
+        mailContent += "Stock centros en csv: " + csvstockCount + System.lineSeparator() + System.lineSeparator();
+        mailContent += "Stock Plataforma en csv: " + csvplataformaCount + System.lineSeparator() + System.lineSeparator();
+        mailContent += "Stock Toprecambios en csv: " + csvtoprecambiosCount + System.lineSeparator() + System.lineSeparator();
 
-        mailContent += " Productos OK que se importarán:" + productCount + System.lineSeparator();
-        //mailContent += " Stock plataforma OK que se importará:" + plataformaCount;
-        //mailContent += " Stock toprecambios OK que se importará:" + toprecambiosCount;
-        //mailContent += " Stock centros OK que se importará:" + stockCount;
+        mailContent += "Productos OK que se importarán: " + productCount + System.lineSeparator() + System.lineSeparator();
+        //mailContent += "Stock plataforma OK que se importará:" + plataformaCount;
+        //mailContent += "Stock toprecambios OK que se importará:" + toprecambiosCount;
+        //mailContent += "Stock centros OK que se importará:" + stockCount;
 
-        mailContent += " Productos KO descartados: " + System.lineSeparator();
+        mailContent += "Listado de productos KO que no se importarán: " + System.lineSeparator() + System.lineSeparator();
 
         List<Productko> lstprod =  prodkorepo.findLastProductsko();
 
 
         for (Object pko : lstprod) {
-            mailContent += ToStringBuilder.reflectionToString(pko, ToStringStyle.SIMPLE_STYLE) + System.lineSeparator();
+            mailContent += "  " +  ToStringBuilder.reflectionToString(pko, ToStringStyle.SIMPLE_STYLE) + System.lineSeparator();
 
         }
 
-        System.out.println(mailContent);
-
-
         /*TODO productos añadidos hoy */
 
-
         return mailContent;
-
-    }
-
-    private String getSpartaVersion() {
-
-        String sTicket=StratioHttpClient.getDCOSTicket();
-
-        String resul=StratioHttpClient.callSpartaAPI(sTicket);
-        System.out.println(resul);
-
-        return "";
-    }
-
-    private String runWorkflow(String wf_path, String wf_name,int wf_version) {
-
-
-            String sTicket=StratioHttpClient.getDCOSTicket();
-
-            log.info(ECOMMERCE+ ": DCOS ticket: " + sTicket);
-
-            String resul=StratioHttpClient.runSpartaWF(sTicket,wf_path,wf_name,wf_version);
-
-            return resul;
-
 
     }
 

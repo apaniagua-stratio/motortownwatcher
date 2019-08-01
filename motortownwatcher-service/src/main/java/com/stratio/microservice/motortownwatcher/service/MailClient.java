@@ -8,6 +8,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class MailClient {
 
@@ -18,14 +20,23 @@ public class MailClient {
         this.mailSender = mailSender;
     }
 
-    public void prepareAndSend(String recipient, String message) {
+    @Autowired
+    private MailContentBuilder mailContentBuilder;
 
-        MimeMessagePreparator messagePreparator = mimeMessage -> {
+    public void prepareAndSend(String sender, String recipient, String subject, String message) {
+
+        final String subjectDate= LocalDateTime.now().plusHours(2) + " " +  subject;
+
+            MimeMessagePreparator messagePreparator = mimeMessage -> {
             MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom("alvaro.paniagua@gmail.com");
+            messageHelper.setFrom(sender);
             messageHelper.setTo(recipient);
-            messageHelper.setSubject("Sample spring mail subject");
+            messageHelper.setSubject(subjectDate);
+
+            String content = mailContentBuilder.build(message);
+            //messageHelper.setText(content, true);
             messageHelper.setText(message);
+
         };
         try {
             mailSender.send(messagePreparator);

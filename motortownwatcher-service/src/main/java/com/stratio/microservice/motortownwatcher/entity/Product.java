@@ -15,6 +15,7 @@ public class Product {
     @Id
     public String EAN;
     public String precio;
+    public String originalfile;
 
 
     protected Product() {}

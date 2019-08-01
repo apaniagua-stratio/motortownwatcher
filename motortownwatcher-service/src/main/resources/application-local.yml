@@ -5,7 +5,6 @@ swagger:
     description: stratio- Microservice API Description
     version: v1
 
-
 logging:
   level:
     root: INFO
@@ -21,12 +20,24 @@ logging:
     jdbc.resultset: FATAL
     jdbc.connection: FATAL
 
-
 spring:
   datasource:
     url: jdbc:postgresql://poolpostgrestls.anjana.local:10234/postgres?user=fjurado&prepareThreshold=0&reWriteBatchedInserts=true&ssl=true&sslmode=verify-ca&sslcert=/home/apaniagua/Documentos/aurgi/certs/Certificado Postgres (conexión desde exterior)/fjurado.crt&sslrootcert=/home/apaniagua/Documentos/aurgi/certs/Certificado Postgres (conexión desde exterior)/root-ca.crt&sslkey=/home/apaniagua/Documentos/aurgi/certs/Certificado Postgres (conexión desde exterior)/fjurado.pk8&loginTimeout=60
     username: fjurado
     password:
+
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size : 50
+        order_inserts : true
+        dialect : org.hibernate.dialect.PostgreSQL95Dialect
+        globally_quoted_identifiers : true
+    hibernate:
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
   mail:
     host: smtp.gmail.com
@@ -45,15 +56,6 @@ spring:
             enable: true
 
 
-
-
-spring.jpa.properties.hibernate.jdbc.batch_size : 50
-spring.jpa.properties.hibernate.order_inserts : true
-spring.jpa.properties.hibernate.dialect : org.hibernate.dialect.PostgreSQL95Dialect
-spring.jpa.hibernate.naming.implicit-strategy : org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
-spring.jpa.hibernate.naming.physical-strategy : org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-spring.jpa.properties.hibernate.globally_quoted_identifiers : true
-
 ecommerce: MOTORTOWN
 sftphost: 10.20.1.112
 sftpuser: motortown_watcher
@@ -62,14 +64,11 @@ sftpinfolder: /anjana/motortown_pro/ingesta_productos_stock/pendiente/
 sftpoutfolder: /anjana/motortown_pro/ingesta_productos_stock/en_proceso/
 schedulerRate: 900000
 schedulerCron: 0 33 14 * * *
-spartawfpath: /motortown
-spartawfname: motortown-recalculo
-spartawfversion: 28
-spartaretries: 3
-spartahost: sparta.anjana.local/sparta-server
 requestauth: https://cc.anjana.local/sso/login?service=https%3A%2F%2Fcc.anjana.local%2Fsso%2Foauth2.0%2FcallbackAuthorize
 motortownsync: http://10.20.1.65:10078/reprocess
-adminmail: apaniagua@stratio.com
+sendermail: apaniagua@stratio.com
+receivermail: apaniagua@stratio.com
+subjectmail: Validacion de ficheros de producto
 
 server:
   port: 8888
