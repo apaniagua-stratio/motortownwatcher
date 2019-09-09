@@ -75,6 +75,15 @@ public class ScheduledTask {
         SftpReader reader = new SftpReader();
         List<Csvfile> listaZip=reader.listZipFileFromSftp(sftpuser,sftphost,sftpkey,sftpinfolder);
 
+        List lst = csvrepo.findByfilename("test");
+
+        if (lst.size() == 0) {
+            log.info(" POSTGRES DEV: NOT FOUND");
+        }
+        else {
+            log.info(" POSTGRES DEV: FOUND!!");
+        }
+
 
         boolean found=false;
         Iterator<Csvfile> csvIterator = listaZip.iterator();
@@ -118,6 +127,8 @@ public class ScheduledTask {
         if (!found) log.info(ECOMMERCE + ": no new files were detected on SFTP. ");
 
 
+
+        log.info(ECOMMERCE + ": just testing dev version ");
         log.info(ECOMMERCE + ": scheduled job end at: " + dateFormat.format(new Date()));
 
     }
@@ -145,10 +156,15 @@ public class ScheduledTask {
         //long stockCount=stockrepo.count();
         //int plataformaCount= stockrepo.findByIdnavision("20").size();
         //int toprecambiosCount= stockrepo.findByIdnavision("100001").size();
+        /*
+        das d hrap might put simitsu sit der also satpad, and genpad wen arrive, point is got sit stil pendin
+         */
         long productCount= prodrepo.findLastProductsOk().size();
+        String originalfile=prodrepo.findLastOriginalFile();
         //stockCount= stockCount - plataformaCount - toprecambiosCount;
 
         String mailContent="";
+        mailContent += System.lineSeparator() + "Fichero que se va a ingestar: " + originalfile + System.lineSeparator() + System.lineSeparator();
         mailContent += System.lineSeparator() + "Productos en csv: " + csvproductCount + System.lineSeparator() + System.lineSeparator();
         mailContent += "Stock centros en csv: " + csvstockCount + System.lineSeparator() + System.lineSeparator();
         mailContent += "Stock Plataforma en csv: " + csvplataformaCount + System.lineSeparator() + System.lineSeparator();

@@ -8,7 +8,7 @@ import javax.persistence.Table;
 
 @Data
 @Entity
-@Table(name = "stock_ok", schema = "motortown")
+@Table(name = "stock_ok")
 
 public class Stock {
 

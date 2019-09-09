@@ -16,4 +16,7 @@ public interface ProductRepository extends CrudRepository<Product, String> {
     @Query(value="Select EAN from Product where originalfile=(Select max(originalfile) from Product)")
     List<Product> findLastProductsOk();
 
+    @Query(value="Select max(originalfile) from Product")
+    String findLastOriginalFile();
+
 }

@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "csvrows", schema = "motortown")
+@Table(name = "csvrows")
 
 public class CsvRow {
 

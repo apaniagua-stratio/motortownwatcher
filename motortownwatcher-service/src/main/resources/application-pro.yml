@@ -19,8 +19,8 @@ logging:
 
 spring:
   datasource:
-    url: jdbc:postgresql://poolpostgres-dev.marathon.mesos:5432/postgres?user=motortown_sync_dev&prepareThreshold=0&ssl=true&sslmode=verify-ca&sslcert=/data/stratio/motortown_sync_dev.pem&sslrootcert=/data/stratio/ca-bundle.pem&sslkey=/data/stratio/motortown_sync_dev.key.pk8&loginTimeout=60
-    username: motortown_sync_dev
+    url: jdbc:postgresql://poolpostgrestls.anjana.local:10234/postgres?user=motortown_sync&prepareThreshold=0&ssl=true&sslmode=verify-ca&sslcert=/data/stratio/motortown_sync.pem&sslrootcert=/data/stratio/ca-bundle.pem&sslkey=/data/stratio/motortown_sync.key.pk8&loginTimeout=60
+    username: motortown_sync
     password:
 
   jpa:
@@ -57,14 +57,14 @@ spring:
 
 ecommerce: MOTORTOWN
 sftphost: 10.20.1.112
-sftpuser: motortown_watcher_dev
-sftpkey: /data/stratio/motortownwatcher-dev.key
-sftpinfolder: /uploads/ingesta_productos_stock_dev/pendiente/
-sftpoutfolder: /uploads/ingesta_productos_stock_dev/en_proceso/
+sftpuser: motortown_watcher
+sftpkey: /data/stratio/motortownwatcher.key
+sftpinfolder: /uploads/ingesta_productos_stock/pendiente/
+sftpoutfolder: /uploads/ingesta_productos_stock/en_proceso/
 schedulerRate: 900000
 schedulerCron: 0 15 02,14 * * *
 requestauth: https://cc.anjana.local/sso/login?service=https%3A%2F%2Fcc.anjana.local%2Fsso%2Foauth2.0%2FcallbackAuthorize
-motortownsync: http://motortownsyncdev.motortown-dev.marathon.mesos:8080/reprocess
+motortownsync: http://motortownsync.motortown.marathon.mesos:8080/reprocess
 sendermail: tiendaonline@motortown.es
 receivermail: apaniagua@stratio.com
 subjectmail: Validacion de ficheros de producto

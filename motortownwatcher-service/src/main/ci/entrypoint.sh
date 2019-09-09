@@ -44,20 +44,20 @@ INFO "Motortownwatcher Login in vault OK"
 
 #2--- GET SECRETS WITH APP TOKEN
 getCert "userland" \
-       "motortownwatcher" \
-       "motortownwatcher" \
+       "motortownwatcher-dev" \
+       "motortownwatcher-dev" \
         "PEM" \
         "/data/stratio" \
-&& echo "motortownwatcher OK: Getting certificate motortownwatcher" \
-|| echo "motortownwatcher Error: Getting certificate motortownwatcher"
+&& echo "motortownwatcher OK: Getting certificate motortownwatcher-dev" \
+|| echo "motortownwatcher Error: Getting certificate motortownwatcher-dev"
 
 getCert "userland" \
-       "motortown_sync" \
-       "motortown_sync" \
+       "motortown_sync_dev" \
+       "motortown_sync_dev" \
         "PEM" \
         "/data/stratio" \
-&& echo "motortownwatcher OK: Getting certificate" \
-|| echo "motortownwatcher Error: Getting certificate"
+&& echo "motortownwatcher OK: Getting certificate motortown_sync_dev" \
+|| echo "motortownwatcher Error: Getting certificate motortown_sync_dev"
 
 
 #GET CA-BUNDLE for given CA $SSL_CERT_PATH/ca-bundle.pem
@@ -69,7 +69,7 @@ CA_BUNDLE_PEM="/data/stratio/ca-bundle.pem"
 
 openssl x509 -outform der -in ${CA_BUNDLE_PEM} -out ${CA_BUNDLE_PEM}.der
 
-openssl pkcs8 -topk8 -inform PEM -outform DER -in /data/stratio/motortown_sync.key -out /data/stratio/motortown_sync.key.pk8 -nocrypt
+openssl pkcs8 -topk8 -inform PEM -outform DER -in /data/stratio/motortown_sync_dev.key -out /data/stratio/motortown_sync_dev.key.pk8 -nocrypt
 
 ${JAVA_HOME}/bin/keytool -noprompt -import -storepass "changeit" -file ${CA_BUNDLE_PEM}.der -alias ${MARATHON_SERVICE_NAME} -cacerts
 
